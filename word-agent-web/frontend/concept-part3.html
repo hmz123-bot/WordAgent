@@ -1,0 +1,159 @@
+<!-- Import Modal -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <div class="modal-header"><h2>📤 导入文档</h2><button class="modal-close" onclick="closeModal('importModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">选择文件</label>
+        <div class="upload-zone" style="margin:0;padding:24px" onclick="showToast('📄','文件选择对话框已打开')">
+          <div class="upload-zone-icon" style="font-size:28px;margin-bottom:8px">📄</div>
+          <div class="upload-zone-text" style="font-size:13px">点击选择 .docx 文件</div>
+          <div class="upload-zone-hint">最大 50MB</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">文档名称（可选）</label>
+        <input class="form-input" type="text" placeholder="留空则使用文件名">
+      </div>
+      <div class="form-group">
+        <label class="form-label">标签</label>
+        <input class="form-input" type="text" placeholder="例如: 项目文档, 技术方案">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('importModal')">取消</button>
+      <button class="btn btn-primary" onclick="closeModal('importModal');showToast('✅','文档导入成功')">开始导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Changeset Modal -->
+<div class="modal-overlay" id="createChangesetModal">
+  <div class="modal">
+    <div class="modal-header"><h2>➕ 新建变更集</h2><button class="modal-close" onclick="closeModal('createChangesetModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">变更摘要</label>
+        <input class="form-input" type="text" placeholder="简要描述本次变更内容" value="调整预算分配方案">
+      </div>
+      <div class="form-group">
+        <label class="form-label">目标文档</label>
+        <select class="form-input form-select">
+          <option>2025年度项目计划书.docx</option>
+          <option>技术架构设计文档.docx</option>
+          <option>产品需求文档 PRD.docx</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">变更内容</label>
+        <textarea class="form-input form-textarea" placeholder="描述具体的变更内容...">1. 修改预算分配：阶段一从 ¥300 万调整为 ¥250 万
+2. 新增预算明细表格
+3. 更新项目时间线</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">幂等密钥（Idempotency Key）</label>
+        <input class="form-input" type="text" placeholder="可选，防止重复提交" value="idem-20251218-001">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('createChangesetModal')">取消</button>
+      <button class="btn btn-primary" onclick="closeModal('createChangesetModal');showToast('✅','变更集已创建')">创建变更集</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span class="toast-icon" id="toastIcon">✅</span><span id="toastMessage">操作成功</span></div>
+
+<script>
+function switchPage(page) {
+  document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
+  document.getElementById('page-' + page).style.display = 'block';
+  document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+  const sidebarMap = {dashboard:'dashboard',documents:'documents',editor:'editor',search:'search',versions:'versions',changesets:'changesets',projection:'projection',api:'api'};
+  const target = sidebarMap[page];
+  document.querySelectorAll('.sidebar-item').forEach(item => {
+    if (item.getAttribute('onclick') && item.getAttribute('onclick').includes("'" + page + "'")) {
+      item.classList.add('active');
+    }
+  });
+  closeModal('importModal');
+  closeModal('createChangesetModal');
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function showToast(icon, message) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastIcon').textContent = icon;
+  document.getElementById('toastMessage').textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function switchApiTab(el, tabId) {
+  document.querySelectorAll('#page-api .tab-item').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#page-api .tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+document.querySelectorAll('.sidebar-item').forEach(item => {
+  item.addEventListener('click', function(e) {
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.search-option').forEach(opt => {
+  opt.addEventListener('click', function() {
+    this.classList.toggle('active');
+  });
+});
+
+document.querySelectorAll('.version-item .btn-secondary').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    showToast('↩️', '正在恢复版本...');
+    setTimeout(() => showToast('✅', '版本已恢复'), 1500);
+  });
+});
+
+document.querySelectorAll('.changeset-actions .btn-secondary').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const item = this.closest('.changeset-item');
+    const status = item.querySelector('.changeset-status');
+    status.className = 'changeset-status accepted';
+    status.textContent = '✅ 已接受';
+    this.closest('.changeset-actions').innerHTML = '<button class="btn btn-ghost btn-sm">📄 查看</button>';
+  });
+});
+
+document.querySelectorAll('.changeset-actions .btn-danger').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const item = this.closest('.changeset-item');
+    const status = item.querySelector('.changeset-status');
+    status.className = 'changeset-status rejected';
+    status.textContent = '❌ 已拒绝';
+    this.closest('.changeset-actions').innerHTML = '<button class="btn btn-ghost btn-sm">📄 查看</button>';
+  });
+});
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.classList.remove('open');
+    }
+  });
+});
+</script>
+</body>
+</html>

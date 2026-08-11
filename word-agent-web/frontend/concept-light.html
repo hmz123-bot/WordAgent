@@ -1,0 +1,1420 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Agent — 文档智能引擎</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F8F6F3;
+  --surface: #FFF;
+  --surface-hover: #F3F1EE;
+  --text: #1A1D24;
+  --text-secondary: #7A7F8A;
+  --text-tertiary: #B0B4BC;
+  --accent: #2D8C7F;
+  --accent-hover: #247367;
+  --accent-light: #E8F3F1;
+  --teal: #2D8C7F;
+  --teal-light: #E8F3F1;
+  --green: #3A7D5C;
+  --green-light: #E8F3ED;
+  --red: #B85D5D;
+  --red-light: #F5E8E8;
+  --orange: #C48A3A;
+  --orange-light: #F5EDE0;
+  --border: #E5E1DB;
+  --border-light: #EFEBE5;
+  --shadow: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-sans: 'Instrument Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --nav-w: 56px;
+  --top-h: 56px;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.nav {
+  position: fixed; left: 0; top: 0; bottom: 0;
+  width: var(--nav-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  align-items: center; padding: 20px 0 16px;
+  z-index: 100; gap: 2px;
+}
+.nav-brand {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-serif); font-size: 15px; font-style: italic;
+  margin-bottom: 20px; cursor: default; letter-spacing: 0.02em;
+}
+.nav-item {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: transparent;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--text-tertiary);
+  transition: all .2s; position: relative;
+}
+.nav-item:hover { background: var(--border-light); color: var(--text); }
+.nav-item.active { background: var(--accent-light); color: var(--accent); }
+.nav-item::after {
+  content: attr(data-tip);
+  position: absolute; left: calc(100% + 14px);
+  top: 50%; transform: translateY(-50%);
+  background: var(--text); color: #fff;
+  font-size: 11px; font-family: var(--font-sans);
+  padding: 4px 10px; border-radius: 6px;
+  white-space: nowrap; opacity: 0; pointer-events: none;
+  transition: opacity .15s; font-weight: 500;
+}
+.nav-item:hover::after { opacity: 1; }
+.nav-spacer { flex: 1; }
+.nav-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--border-light); margin-top: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 600; color: var(--text-secondary);
+  cursor: pointer;
+}
+.layout {
+  margin-left: var(--nav-w); flex: 1;
+  min-height: 100vh; display: flex; flex-direction: column;
+}
+.topbar {
+  height: var(--top-h);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; border-bottom: 1px solid var(--border);
+  background: var(--surface); flex-shrink: 0;
+}
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-breadcrumb {
+  font-size: 13px; color: var(--text-tertiary);
+  display: flex; align-items: center; gap: 6px;
+}
+.topbar-breadcrumb span { color: var(--text-secondary); }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.topbar-search {
+  display: flex; align-items: center;
+  background: var(--bg); border-radius: 8px;
+  padding: 0 12px; height: 34px;
+  border: 1px solid transparent; transition: border .2s;
+  gap: 8px; color: var(--text-tertiary); font-size: 13px;
+}
+.topbar-search:focus-within { border-color: var(--border); background: var(--surface); }
+.topbar-search input {
+  border: none; background: transparent; outline: none;
+  font-family: var(--font-sans); font-size: 13px; color: var(--text); width: 160px;
+}
+.topbar-search input::placeholder { color: var(--text-tertiary); }
+.main {
+  flex: 1; padding: 32px 40px;
+  max-width: 1280px; width: 100%;
+}
+.page { display: none; }
+.page.active { display: block; animation: fadeUp .4s ease-out; }
+.page-h { margin-bottom: 32px; }
+.page-h-title {
+  font-family: var(--font-serif);
+  font-size: 30px; font-style: italic;
+  color: var(--text); letter-spacing: -0.02em;
+}
+.page-h-sub { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+.stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 16px; margin-bottom: 32px;
+}
+.stat {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 20px 24px;
+  transition: box-shadow .2s;
+}
+.stat:hover { box-shadow: var(--shadow-md); }
+.stat-icon {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; margin-bottom: 14px;
+}
+.stat-icon.amber { background: var(--accent-light); color: var(--accent); }
+.stat-icon.teal { background: var(--teal-light); color: var(--teal); }
+.stat-icon.green { background: var(--green-light); color: var(--green); }
+.stat-icon.orange { background: var(--orange-light); color: var(--orange); }
+.stat-value {
+  font-family: var(--font-serif); font-size: 28px; font-style: italic;
+  color: var(--text); line-height: 1.1;
+}
+.stat-label { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.upload-zone {
+  border: 2px dashed var(--border); border-radius: var(--radius);
+  padding: 40px; text-align: center;
+  background: var(--surface); cursor: pointer;
+  transition: all .25s; margin-bottom: 32px;
+}
+.upload-zone:hover { border-color: var(--accent); background: var(--accent-light); }
+.upload-zone-icon { font-size: 32px; margin-bottom: 10px; opacity: 0.6; }
+.upload-zone-text { font-size: 15px; font-weight: 500; }
+.upload-zone-hint { font-size: 13px; color: var(--text-tertiary); margin-top: 4px; }
+.section {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); margin-bottom: 24px; overflow: hidden;
+}
+.section-h {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px; border-bottom: 1px solid var(--border-light);
+}
+.section-h h3 { font-family: var(--font-serif); font-size: 18px; font-style: italic; }
+.section-h-actions { display: flex; gap: 8px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  text-align: left; padding: 10px 24px;
+  font-weight: 500; font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  border-bottom: 1px solid var(--border-light);
+  background: var(--surface-hover);
+}
+tbody td {
+  padding: 12px 24px; border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--surface-hover); }
+.doc-name { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+.doc-name-icon { font-size: 16px; flex-shrink: 0; }
+.doc-size { color: var(--text-secondary); font-size: 12px; white-space: nowrap; }
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 500; padding: 2px 10px; border-radius: 20px;
+}
+.badge-dot { width: 5px; height: 5px; border-radius: 50%; }
+.badge-ready { background: var(--green-light); color: var(--green); }
+.badge-ready .badge-dot { background: var(--green); }
+.badge-draft { background: var(--orange-light); color: var(--orange); }
+.badge-draft .badge-dot { background: var(--orange); }
+.badge-pending { background: var(--teal-light); color: var(--teal); }
+.badge-pending .badge-dot { background: var(--teal); }
+.badge-accepted { background: var(--green-light); color: var(--green); }
+.badge-accepted .badge-dot { background: var(--green); }
+.badge-rejected { background: var(--red-light); color: var(--red); }
+.badge-rejected .badge-dot { background: var(--red); }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-sans); font-size: 13px; font-weight: 500;
+  padding: 7px 16px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text); cursor: pointer;
+  transition: all .15s; white-space: nowrap;
+}
+.btn:hover { background: var(--surface-hover); border-color: var(--text-tertiary); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn-ghost { border-color: transparent; background: transparent; }
+.btn-ghost:hover { background: var(--border-light); }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-icon { width: 32px; height: 32px; padding: 0; justify-content: center; }
+.editor-layout {
+  display: grid; grid-template-columns: 280px 1fr;
+  gap: 24px; min-height: 500px;
+}
+.editor-sidebar {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 16px;
+}
+.editor-sidebar-h {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text-tertiary); margin-bottom: 12px; font-weight: 500;
+}
+.tree { list-style: none; }
+.tree li { padding: 4px 0; }
+.tree-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  cursor: pointer; padding: 3px 8px; border-radius: 6px;
+  font-size: 13px; transition: background .15s;
+}
+.tree-toggle:hover { background: var(--border-light); }
+.tree-toggle .arrow { font-size: 8px; color: var(--text-tertiary); transition: transform .2s; }
+.tree-toggle .arrow.open { transform: rotate(90deg); }
+.tree-toggle .icon { font-size: 14px; }
+.tree-toggle .label { color: var(--text-secondary); }
+.tree ul { padding-left: 20px; list-style: none; }
+.editor-canvas {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 32px 40px; min-height: 500px;
+}
+.editor-canvas-toolbar {
+  display: flex; gap: 4px; padding-bottom: 16px; margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-light); flex-wrap: wrap;
+}
+.toolbar-btn {
+  width: 32px; height: 32px; border-radius: 6px; border: none;
+  background: transparent; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-tertiary); transition: all .15s;
+}
+.toolbar-btn:hover { background: var(--border-light); color: var(--text); }
+.toolbar-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; align-self: center; }
+.editor-content { font-size: 15px; line-height: 1.8; }
+.editor-content h1 { font-family: var(--font-serif); font-size: 26px; font-style: italic; margin-bottom: 16px; }
+.editor-content h2 { font-family: var(--font-serif); font-size: 20px; font-style: italic; margin: 24px 0 8px; }
+.editor-content p { margin-bottom: 12px; color: var(--text-secondary); }
+.editor-content .cursor {
+  display: inline-block; width: 2px; height: 1.1em;
+  background: var(--accent); animation: blink 1s step-end infinite;
+  vertical-align: text-bottom; margin-left: 1px;
+}
+@keyframes blink { 50% { opacity: 0; } }
+.search-panel {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 24px; margin-bottom: 24px;
+}
+.search-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.search-input-wrap {
+  flex: 1; min-width: 200px;
+  display: flex; align-items: center;
+  background: var(--bg); border-radius: 8px;
+  padding: 0 14px; height: 40px; border: 1px solid var(--border);
+  gap: 10px; transition: border .2s;
+}
+.search-input-wrap:focus-within { border-color: var(--accent); }
+.search-input-wrap input {
+  border: none; background: transparent; outline: none;
+  font-family: var(--font-sans); font-size: 14px; color: var(--text); width: 100%;
+}
+.search-filters { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.filter-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border); background: var(--surface);
+  cursor: pointer; transition: all .15s; color: var(--text-secondary);
+}
+.filter-chip:hover { border-color: var(--text-tertiary); }
+.filter-chip.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+.search-result-item {
+  padding: 16px 20px; border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm); margin-bottom: 12px;
+  background: var(--surface); transition: box-shadow .2s;
+}
+.search-result-item:hover { box-shadow: var(--shadow); }
+.search-result-path { font-size: 12px; color: var(--text-tertiary); margin-bottom: 4px; }
+.search-result-text { font-size: 14px; line-height: 1.7; }
+.search-result-text mark { background: var(--accent-light); color: var(--accent); padding: 0 2px; border-radius: 2px; }
+.search-result-meta { font-size: 12px; color: var(--text-secondary); margin-top: 8px; display: flex; gap: 16px; }
+.timeline { position: relative; padding: 24px; }
+.timeline::before {
+  content: ''; position: absolute; left: 23px; top: 0; bottom: 0;
+  width: 1px; background: var(--border);
+}
+.timeline-item { display: flex; gap: 16px; padding-bottom: 24px; position: relative; }
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--border); flex-shrink: 0; margin-top: 4px;
+  position: relative; z-index: 1; border: 2px solid var(--surface);
+}
+.timeline-dot.current { background: var(--accent); }
+.timeline-dot.past { background: var(--teal); }
+.timeline-body { flex: 1; }
+.timeline-title { font-weight: 500; font-size: 14px; }
+.timeline-meta { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+.timeline-actions { margin-top: 8px; }
+.changeset {
+  border: 1px solid var(--border-light); border-radius: var(--radius-sm);
+  margin-bottom: 12px; background: var(--surface); overflow: hidden;
+}
+.changeset-h {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; cursor: pointer; transition: background .15s;
+}
+.changeset-h:hover { background: var(--surface-hover); }
+.changeset-h-left { display: flex; align-items: center; gap: 12px; }
+.changeset-h-right { display: flex; align-items: center; gap: 8px; }
+.changeset-body {
+  padding: 16px 20px; border-top: 1px solid var(--border-light); display: none;
+}
+.changeset-body.open { display: block; }
+.change-line {
+  display: flex; gap: 8px; padding: 4px 0;
+  font-family: var(--font-mono); font-size: 12px;
+}
+.change-line.add { color: var(--green); }
+.change-line.del { color: var(--red); }
+.change-line.add::before { content: '+'; color: var(--green); }
+.change-line.del::before { content: '\2212'; color: var(--red); }
+.projection-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.projection-panel {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); overflow: hidden;
+}
+.projection-panel-h {
+  padding: 14px 20px; border-bottom: 1px solid var(--border-light);
+  font-weight: 500; font-size: 13px; display: flex; align-items: center; gap: 8px;
+}
+.projection-panel-body { padding: 20px; min-height: 200px; }
+.projection-preview {
+  background: #fff; border-radius: 8px;
+  border: 1px solid var(--border-light); padding: 24px;
+  font-size: 14px; line-height: 1.8;
+}
+.api-section { margin-bottom: 32px; }
+.api-section h3 {
+  font-family: var(--font-serif); font-size: 19px; font-style: italic;
+  margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border-light);
+}
+.api-endpoint {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); margin-bottom: 12px; overflow: hidden;
+}
+.api-endpoint-h {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; cursor: pointer; transition: background .15s;
+}
+.api-endpoint-h:hover { background: var(--surface-hover); }
+.api-method {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 4px; letter-spacing: 0.05em; flex-shrink: 0;
+}
+.api-method.get { background: var(--teal-light); color: var(--teal); }
+.api-method.post { background: var(--accent-light); color: var(--accent); }
+.api-method.put { background: var(--orange-light); color: var(--orange); }
+.api-method.delete { background: var(--red-light); color: var(--red); }
+.api-path { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+.api-desc { font-size: 13px; color: var(--text-secondary); margin-left: auto; }
+.api-body {
+  padding: 16px; border-top: 1px solid var(--border-light);
+  display: none; background: var(--surface-hover);
+}
+.api-body.open { display: block; }
+.api-body pre {
+  font-family: var(--font-mono); font-size: 12px; line-height: 1.6;
+  background: var(--surface); padding: 12px 16px; border-radius: 6px;
+  border: 1px solid var(--border-light); overflow-x: auto;
+  color: var(--text-secondary);
+}
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(26,29,36,0.35);
+  backdrop-filter: blur(4px); z-index: 200;
+  display: none; align-items: center; justify-content: center;
+  animation: fadeIn .2s;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border-radius: var(--radius);
+  width: 480px; max-width: 90vw;
+  max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+  animation: scaleIn .25s ease-out;
+}
+.modal-h {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px; border-bottom: 1px solid var(--border-light);
+}
+.modal-h h2 { font-family: var(--font-serif); font-size: 19px; font-style: italic; }
+.modal-close {
+  width: 28px; height: 28px; border-radius: 6px; border: none;
+  background: transparent; cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-tertiary); transition: all .15s;
+}
+.modal-close:hover { background: var(--border-light); color: var(--text); }
+.modal-body { padding: 24px; }
+.modal-footer {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 16px 24px; border-top: 1px solid var(--border-light);
+}
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+.form-input {
+  width: 100%; padding: 8px 14px; border: 1px solid var(--border);
+  border-radius: 8px; font-family: var(--font-sans); font-size: 14px;
+  color: var(--text); background: var(--bg); outline: none; transition: border .2s;
+}
+.form-input:focus { border-color: var(--accent); background: var(--surface); }
+.form-input::placeholder { color: var(--text-tertiary); }
+.form-select {
+  width: 100%; padding: 8px 14px; border: 1px solid var(--border);
+  border-radius: 8px; font-family: var(--font-sans); font-size: 14px;
+  color: var(--text); background: var(--bg); outline: none; cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237A7F8A' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+  padding-right: 32px;
+}
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 300;
+  background: var(--text); color: #fff; padding: 12px 20px;
+  border-radius: 10px; font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 8px 24px rgba(26,29,36,0.2);
+  transform: translateY(20px); opacity: 0;
+  transition: all .3s ease-out; pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+</style>
+</head>
+<body>
+<!-- Sidebar -->
+<nav class="nav">
+  <div class="nav-brand">W</div>
+  <button class="nav-item active" data-page="dashboard" data-tip="概览" onclick="switchPage('dashboard')">&#9632;</button>
+  <button class="nav-item" data-page="documents" data-tip="文档" onclick="switchPage('documents')">&#9776;</button>
+  <button class="nav-item" data-page="editor" data-tip="编辑器" onclick="switchPage('editor')">&#9998;</button>
+  <button class="nav-item" data-page="search" data-tip="搜索" onclick="switchPage('search')">&#9906;</button>
+  <button class="nav-item" data-page="versions" data-tip="版本" onclick="switchPage('versions')">&#8635;</button>
+  <button class="nav-item" data-page="changesets" data-tip="变更" onclick="switchPage('changesets')">&#10065;</button>
+  <button class="nav-item" data-page="projection" data-tip="投影" onclick="switchPage('projection')">&#9670;</button>
+  <button class="nav-item" data-page="api" data-tip="API" onclick="switchPage('api')">&#60;&#47;&#62;</button>
+  <div class="nav-spacer"></div>
+  <div class="nav-avatar">S</div>
+</nav>
+
+<!-- Layout -->
+<div class="layout">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-breadcrumb"><span id="pageTitle">概览</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-search">
+        <span>&#9906;</span>
+        <input type="text" placeholder="快速搜索文档..." id="globalSearch" onkeydown="if(event.key==='Enter'){document.getElementById('searchQuery').value=this.value;switchPage('search')}">
+      </div>
+      <button class="btn btn-sm" onclick="showToast('系统通知', '暂无新通知')">&#128276;</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- ====== Dashboard ====== -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-h">
+        <h1 class="page-h-title">您好，这里是 Word Agent</h1>
+        <p class="page-h-sub">文档智能解析与结构化编辑引擎</p>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-icon amber">&#128196;</div>
+          <div class="stat-value">24</div>
+          <div class="stat-label">文档总数</div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon teal">&#128203;</div>
+          <div class="stat-value">128</div>
+          <div class="stat-label">节点总数</div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon green">&#10003;</div>
+          <div class="stat-value">16</div>
+          <div class="stat-label">已处理变更</div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon orange">&#128337;</div>
+          <div class="stat-value">3.2k</div>
+          <div class="stat-label">搜索次数</div>
+        </div>
+      </div>
+
+      <div class="upload-zone" onclick="showToast('文档导入', '选择 .docx 文件上传')">
+        <div class="upload-zone-icon">&#128194;</div>
+        <div class="upload-zone-text">拖拽文件到此处，或点击上传</div>
+        <div class="upload-zone-hint">支持 .docx / .doc / .xml 格式</div>
+      </div>
+
+      <div class="section">
+        <div class="section-h">
+          <h3>最近文档</h3>
+          <div class="section-h-actions">
+            <button class="btn btn-sm" onclick="switchPage('documents')">查看全部 &rarr;</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>文档名称</th>
+                <th>格式</th>
+                <th>大小</th>
+                <th>版本</th>
+                <th>状态</th>
+                <th>更新时间</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="doc-name"><span class="doc-name-icon">&#128196;</span>产品需求文档_v3</div></td>
+                <td>.docx</td>
+                <td class="doc-size">2.4 MB</td>
+                <td>3</td>
+                <td><span class="badge badge-ready"><span class="badge-dot"></span>就绪</span></td>
+                <td class="doc-size">10 分钟前</td>
+                <td><button class="btn btn-ghost btn-sm" onclick="switchPage('editor')">编辑</button></td>
+              </tr>
+              <tr>
+                <td><div class="doc-name"><span class="doc-name-icon">&#128196;</span>2024年度总结报告</div></td>
+                <td>.docx</td>
+                <td class="doc-size">5.8 MB</td>
+                <td>7</td>
+                <td><span class="badge badge-ready"><span class="badge-dot"></span>就绪</span></td>
+                <td class="doc-size">1 小时前</td>
+                <td><button class="btn btn-ghost btn-sm" onclick="switchPage('editor')">编辑</button></td>
+              </tr>
+              <tr>
+                <td><div class="doc-name"><span class="doc-name-icon">&#128196;</span>技术架构设计草案</div></td>
+                <td>.docx</td>
+                <td class="doc-size">1.2 MB</td>
+                <td>2</td>
+                <td><span class="badge badge-draft"><span class="badge-dot"></span>草稿</span></td>
+                <td class="doc-size">3 小时前</td>
+                <td><button class="btn btn-ghost btn-sm" onclick="switchPage('editor')">编辑</button></td>
+              </tr>
+              <tr>
+                <td><div class="doc-name"><span class="doc-name-icon">&#128196;</span>用户手册_中英双语</div></td>
+                <td>.docx</td>
+                <td class="doc-size">8.1 MB</td>
+                <td>5</td>
+                <td><span class="badge badge-ready"><span class="badge-dot"></span>就绪</span></td>
+                <td class="doc-size">昨天</td>
+                <td><button class="btn btn-ghost btn-sm" onclick="switchPage('editor')">编辑</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== Documents ====== -->
+    <div id="page-documents" class="page">
+      <div class="page-h" style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <h1 class="page-h-title">文档管理</h1>
+          <p class="page-h-sub">导入、管理你的文档资产</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="showToast('文档导入', '选择 .docx 文件上传')">+ 导入文档</button>
+          <button class="btn btn-primary" onclick="showToast('新建文档', '创建空白文档')">+ 新建</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-h">
+          <h3>所有文档</h3>
+          <div class="section-h-actions">
+            <button class="btn btn-ghost btn-sm">&#128270; 筛选</button>
+            <button class="btn btn-ghost btn-sm">&#8645; 排序</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>文档名称</th>
+                <th>格式</th>
+                <th>大小</th>
+                <th>版本</th>
+                <th>状态</th>
+                <th>创建时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="doc-name"><span class="doc-name-icon">&#128196;</span>产品需求文档_v3</div></td>
+                <td>.docx</td><td class="doc-size">2.4 MB</td><td>3</td>
+                <td><span class="badge badge-ready"><span class="badge-dot"></span>就绪</span></td>
+                <td class="doc-size">2024-12-01</td>
+                <td>
+                  <button class="btn btn-ghost btn-sm" onclick="switchPage('editor')">编辑</button>
+                  <button class="btn btn-ghost btn-sm" onclick="showToast('删除文档', '确认删除该文档？')">&#128465;</button>
+                </td>
+              </tr>
+              <tr>
+                <td><div class="doc-name"><span class="doc-name-icon">&#128196;</span>2024年度总结报告</div></td>
+                <td>.docx</td><td class="doc-size">5.8 MB</td><td>7</td>
+                <td><span class="badge badge-ready"><span class="badge-dot"></span>就绪</span></td>
+                <td class="doc-size">2024-11-28</td>
+                <td>
+                  <button class="btn btn-ghost btn-sm" onclick="switchPage('editor')">编辑</button>
+                  <button class="btn btn-ghost btn-sm" onclick="showToast('删除文档', '确认删除该文档？')">&#128465;</button>
+                </td>
+              </tr>
+              <tr>
+                <td><div class="doc-name"><span class="doc-name-icon">&#128196;</span>技术架构设计草案</div></td>
+                <td>.docx</td><td class="doc-size">1.2 MB</td><td>2</td>
+                <td><span class="badge badge-draft"><span class="badge-dot"></span>草稿</span></td>
+                <td class="doc-size">2024-11-25</td>
+                <td>
+                  <button class="btn btn-ghost btn-sm" onclick="switchPage('editor')">编辑</button>
+                  <button class="btn btn-ghost btn-sm" onclick="showToast('删除文档', '确认删除该文档？')">&#128465;</button>
+                </td>
+              </tr>
+              <tr>
+                <td><div class="doc-name"><span class="doc-name-icon">&#128196;</span>用户手册_中英双语</div></td>
+                <td>.docx</td><td class="doc-size">8.1 MB</td><td>5</td>
+                <td><span class="badge badge-ready"><span class="badge-dot"></span>就绪</span></td>
+                <td class="doc-size">2024-11-20</td>
+                <td>
+                  <button class="btn btn-ghost btn-sm" onclick="switchPage('editor')">编辑</button>
+                  <button class="btn btn-ghost btn-sm" onclick="showToast('删除文档', '确认删除该文档？')">&#128465;</button>
+                </td>
+              </tr>
+              <tr>
+                <td><div class="doc-name"><span class="doc-name-icon">&#128196;</span>市场调研分析报告</div></td>
+                <td>.docx</td><td class="doc-size">3.6 MB</td><td>1</td>
+                <td><span class="badge badge-draft"><span class="badge-dot"></span>草稿</span></td>
+                <td class="doc-size">2024-11-18</td>
+                <td>
+                  <button class="btn btn-ghost btn-sm" onclick="switchPage('editor')">编辑</button>
+                  <button class="btn btn-ghost btn-sm" onclick="showToast('删除文档', '确认删除该文档？')">&#128465;</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== Editor ====== -->
+    <div id="page-editor" class="page">
+      <div class="page-h" style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <h1 class="page-h-title">产品需求文档_v3</h1>
+          <p class="page-h-sub">最后编辑：10 分钟前 &middot; 版本 3 &middot; 42 个节点</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm" onclick="showToast('保存', '文档已保存')">&#128190; 保存</button>
+          <button class="btn btn-sm" onclick="showToast('导出', '文档导出中...')">&#128229; 导出</button>
+          <button class="btn btn-primary btn-sm" onclick="showToast('版本', '已创建版本快照')">&#128190; 创建版本</button>
+        </div>
+      </div>
+
+      <div class="editor-layout">
+        <div class="editor-sidebar">
+          <div class="editor-sidebar-h">文档结构</div>
+          <ul class="tree">
+            <li>
+              <div class="tree-toggle" onclick="this.querySelector('.arrow').classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+                <span class="arrow">&#9654;</span>
+                <span class="icon">&#128196;</span>
+                <span class="label">产品需求文档_v3</span>
+              </div>
+              <ul class="tree" style="display:none">
+                <li>
+                  <div class="tree-toggle" onclick="this.querySelector('.arrow').classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+                    <span class="arrow open">&#9654;</span>
+                    <span class="icon">&#128193;</span>
+                    <span class="label">第一章 项目背景</span>
+                  </div>
+                  <ul class="tree">
+                    <li><div class="tree-toggle"><span class="icon">&#9998;</span><span class="label">1.1 市场分析</span></div></li>
+                    <li><div class="tree-toggle"><span class="icon">&#9998;</span><span class="label">1.2 用户需求</span></div></li>
+                    <li><div class="tree-toggle"><span class="icon">&#9998;</span><span class="label">1.3 竞品调研</span></div></li>
+                  </ul>
+                </li>
+                <li>
+                  <div class="tree-toggle" onclick="this.querySelector('.arrow').classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+                    <span class="arrow">&#9654;</span>
+                    <span class="icon">&#128193;</span>
+                    <span class="label">第二章 功能规格</span>
+                  </div>
+                  <ul class="tree" style="display:none">
+                    <li><div class="tree-toggle"><span class="icon">&#9998;</span><span class="label">2.1 核心功能</span></div></li>
+                    <li><div class="tree-toggle"><span class="icon">&#9998;</span><span class="label">2.2 交互流程</span></div></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <div class="editor-canvas">
+          <div class="editor-canvas-toolbar">
+            <button class="toolbar-btn" title="撤销">&#8630;</button>
+            <button class="toolbar-btn" title="重做">&#8631;</button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn" title="加粗"><b>B</b></button>
+            <button class="toolbar-btn" title="斜体"><i>I</i></button>
+            <button class="toolbar-btn" title="下划线"><u>U</u></button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn" title="标题">H</button>
+            <button class="toolbar-btn" title="列表">&#9776;</button>
+            <button class="toolbar-btn" title="引用">&#10077;</button>
+            <button class="toolbar-btn" title="表格">&#9644;</button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn" title="查找">&#9906;</button>
+            <button class="toolbar-btn" title="注释">&#10065;</button>
+          </div>
+          <div class="editor-content">
+            <h1>产品需求文档 v3.0</h1>
+            <h2>1.1 市场分析</h2>
+            <p>当前市场环境正在经历快速变化，数字化转型已成为企业发展的核心驱动力。根据最新研究报告显示，全球文档智能化市场规模预计在2025年将达到 120 亿美元，年复合增长率超过 18%。</p>
+            <p>在这一背景下，企业对于高效、智能的文档处理工具的需求日益迫切。传统的文档管理方式已无法满足现代企业对效率、协作和智能化的要求。</p>
+            <h2>1.2 用户需求</h2>
+            <p>通过对目标用户群体的深入调研，我们识别出以下核心需求：<span class="cursor"></span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== Search ====== -->
+    <div id="page-search" class="page">
+      <div class="page-h">
+        <h1 class="page-h-title">文档搜索</h1>
+        <p class="page-h-sub">全文搜索、正则匹配、批量替换</p>
+      </div>
+      <div class="search-panel">
+        <div class="search-row">
+          <div class="search-input-wrap">
+            <span>&#9906;</span>
+            <input type="text" placeholder="输入搜索关键词..." id="searchQuery" value="市场分析">
+          </div>
+          <button class="btn btn-primary" onclick="showToast('搜索', '找到 3 个匹配结果')">搜索</button>
+          <button class="btn" onclick="document.getElementById('replaceRow').style.display='flex'">&#8644; 替换</button>
+        </div>
+        <div class="search-row" id="replaceRow" style="display:none;margin-top:12px">
+          <div class="search-input-wrap">
+            <span>R</span>
+            <input type="text" placeholder="替换为...">
+          </div>
+          <button class="btn" onclick="showToast('替换', '已替换 3 处内容')">全部替换</button>
+        </div>
+        <div class="search-filters">
+          <span class="filter-chip active" onclick="toggleFilter(this)">&#10003; 全文搜索</span>
+          <span class="filter-chip" onclick="toggleFilter(this)">正则表达式</span>
+          <span class="filter-chip" onclick="toggleFilter(this)">按段落类型</span>
+          <span class="filter-chip" onclick="toggleFilter(this)">按格式</span>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <span style="font-size:13px;color:var(--text-secondary)">共 3 个匹配结果</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm">&#9664; 上一个</button>
+          <button class="btn btn-ghost btn-sm">下一个 &#9654;</button>
+        </div>
+      </div>
+
+      <div class="search-result-item">
+        <div class="search-result-path">产品需求文档_v3 > 第一章 项目背景 > 1.1 市场分析</div>
+        <div class="search-result-text">当前<mark>市场</mark>环境正在经历快速变化，数字化转型已成为企业发展的核心驱动力。根据最新研究报告显示，全球文档智能化<mark>市场</mark>规模预计在2025年将达到 120 亿美元。</div>
+        <div class="search-result-meta"><span>文档：产品需求文档_v3</span><span>位置：段落 3</span></div>
+      </div>
+      <div class="search-result-item">
+        <div class="search-result-path">2024年度总结报告 > 行业分析 > 市场规模</div>
+        <div class="search-result-text">中国智能文档<mark>市场</mark>在2024年继续保持高速增长，头部企业纷纷加大投入，<mark>市场</mark>竞争格局日趋激烈。</div>
+        <div class="search-result-meta"><span>文档：2024年度总结报告</span><span>位置：段落 12</span></div>
+      </div>
+      <div class="search-result-item">
+        <div class="search-result-path">技术架构设计草案 > 技术选型 > 框架对比</div>
+        <div class="search-result-text">经过对当前<mark>市场</mark>主流框架的深入评估，我们选择了最适合企业级应用的架构方案。</div>
+        <div class="search-result-meta"><span>文档：技术架构设计草案</span><span>位置：段落 8</span></div>
+      </div>
+    </div>
+
+    <!-- ====== Versions ====== -->
+    <div id="page-versions" class="page">
+      <div class="page-h" style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <h1 class="page-h-title">版本管理</h1>
+          <p class="page-h-sub">产品需求文档_v3 &middot; 共 7 个版本</p>
+        </div>
+        <button class="btn btn-primary" onclick="showToast('版本', '已创建版本快照')">+ 创建版本</button>
+      </div>
+
+      <div class="section">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot current"></div>
+            <div class="timeline-body">
+              <div class="timeline-title">v3 — 当前版本</div>
+              <div class="timeline-meta">2024年12月1日 14:30 &middot; 张三 编辑</div>
+              <div class="timeline-actions">
+                <button class="btn btn-ghost btn-sm" onclick="showToast('版本', '已回滚到 v3')">&#8635; 回滚到此</button>
+              </div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot past"></div>
+            <div class="timeline-body">
+              <div class="timeline-title">v2 — 更新市场分析章节</div>
+              <div class="timeline-meta">2024年11月25日 09:15 &middot; 李四 编辑</div>
+              <div class="timeline-actions">
+                <button class="btn btn-ghost btn-sm" onclick="showToast('版本', '已回滚到 v2')">&#8635; 回滚到此</button>
+              </div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot past"></div>
+            <div class="timeline-body">
+              <div class="timeline-title">v1 — 初始导入</div>
+              <div class="timeline-meta">2024年11月18日 16:00 &middot; 系统导入</div>
+              <div class="timeline-actions">
+                <button class="btn btn-ghost btn-sm" onclick="showToast('版本', '已回滚到 v1')">&#8635; 回滚到此</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<!-- ====== ChangeSets ====== -->
+    <div id="page-changesets" class="page">
+      <div class="page-h" style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <h1 class="page-h-title">变更审核</h1>
+          <p class="page-h-sub">审阅文档变更，接受或拒绝修改建议</p>
+        </div>
+        <button class="btn btn-primary" onclick="showToast('变更集', '创建新变更集')">+ 新建变更</button>
+      </div>
+
+      <div class="section">
+        <div class="section-h">
+          <h3>待审核变更</h3>
+          <div class="section-h-actions">
+            <span class="badge badge-pending"><span class="badge-dot"></span>3 待处理</span>
+          </div>
+        </div>
+        <div style="padding:20px 24px">
+          <div class="changeset">
+            <div class="changeset-h" onclick="toggleChangeset(this)">
+              <div class="changeset-h-left">
+                <span style="font-size:16px;color:var(--accent)">&#10065;</span>
+                <span style="font-weight:500">更新市场数据</span>
+                <span class="badge badge-pending"><span class="badge-dot"></span>待审</span>
+              </div>
+              <div class="changeset-h-right">
+                <span class="doc-size">张三 &middot; 10 分钟前</span>
+                <span style="font-size:10px;color:var(--text-tertiary)">&#9660;</span>
+              </div>
+            </div>
+            <div class="changeset-body">
+              <div class="change-line add">市场规模更新为 120 亿美元</div>
+              <div class="change-line add">新增年复合增长率 18% 数据</div>
+              <div class="change-line del">移除过时的 2023 年数据</div>
+              <div style="margin-top:12px;display:flex;gap:8px">
+                <button class="btn btn-sm btn-primary" onclick="event.stopPropagation();showToast('变更', '已接受变更')">&#10003; 接受</button>
+                <button class="btn btn-sm" onclick="event.stopPropagation();showToast('变更', '已拒绝变更')">&#10007; 拒绝</button>
+              </div>
+            </div>
+          </div>
+          <div class="changeset">
+            <div class="changeset-h" onclick="toggleChangeset(this)">
+              <div class="changeset-h-left">
+                <span style="font-size:16px;color:var(--accent)">&#10065;</span>
+                <span style="font-weight:500">修改章节标题格式</span>
+                <span class="badge badge-pending"><span class="badge-dot"></span>待审</span>
+              </div>
+              <div class="changeset-h-right">
+                <span class="doc-size">李四 &middot; 1 小时前</span>
+                <span style="font-size:10px;color:var(--text-tertiary)">&#9660;</span>
+              </div>
+            </div>
+            <div class="changeset-body">
+              <div class="change-line add">章节标题统一为 H2 格式</div>
+              <div class="change-line del">移除 H3 格式的章节标题</div>
+              <div style="margin-top:12px;display:flex;gap:8px">
+                <button class="btn btn-sm btn-primary" onclick="event.stopPropagation();showToast('变更', '已接受变更')">&#10003; 接受</button>
+                <button class="btn btn-sm" onclick="event.stopPropagation();showToast('变更', '已拒绝变更')">&#10007; 拒绝</button>
+              </div>
+            </div>
+          </div>
+          <div class="changeset">
+            <div class="changeset-h" onclick="toggleChangeset(this)">
+              <div class="changeset-h-left">
+                <span style="font-size:16px;color:var(--accent)">&#10065;</span>
+                <span style="font-weight:500">添加竞品分析表格</span>
+                <span class="badge badge-pending"><span class="badge-dot"></span>待审</span>
+              </div>
+              <div class="changeset-h-right">
+                <span class="doc-size">王五 &middot; 3 小时前</span>
+                <span style="font-size:10px;color:var(--text-tertiary)">&#9660;</span>
+              </div>
+            </div>
+            <div class="changeset-body">
+              <div class="change-line add">新增竞品对比表格（4 行 x 3 列）</div>
+              <div class="change-line add">填充竞品数据</div>
+              <div style="margin-top:12px;display:flex;gap:8px">
+                <button class="btn btn-sm btn-primary" onclick="event.stopPropagation();showToast('变更', '已接受变更')">&#10003; 接受</button>
+                <button class="btn btn-sm" onclick="event.stopPropagation();showToast('变更', '已拒绝变更')">&#10007; 拒绝</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-h">
+          <h3>已处理变更</h3>
+          <div class="section-h-actions">
+            <span class="badge badge-accepted"><span class="badge-dot"></span>2 已接受</span>
+            <span class="badge badge-rejected"><span class="badge-dot"></span>1 已拒绝</span>
+          </div>
+        </div>
+        <div style="padding:20px 24px">
+          <div class="changeset">
+            <div class="changeset-h" onclick="toggleChangeset(this)">
+              <div class="changeset-h-left">
+                <span style="font-size:16px;color:var(--green)">&#10003;</span>
+                <span style="font-weight:500;color:var(--text-secondary)">调整段落间距</span>
+                <span class="badge badge-accepted"><span class="badge-dot"></span>已接受</span>
+              </div>
+              <div class="changeset-h-right">
+                <span class="doc-size">昨天</span>
+              </div>
+            </div>
+            <div class="changeset-body">
+              <div class="change-line add">段落间距统一为 1.5 倍</div>
+              <div style="margin-top:12px;display:flex;gap:8px">
+                <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();showToast('变更', '已撤销接受')">撤销</button>
+              </div>
+            </div>
+          </div>
+          <div class="changeset">
+            <div class="changeset-h" onclick="toggleChangeset(this)">
+              <div class="changeset-h-left">
+                <span style="font-size:16px;color:var(--red)">&#10007;</span>
+                <span style="font-weight:500;color:var(--text-secondary)">删除附录章节</span>
+                <span class="badge badge-rejected"><span class="badge-dot"></span>已拒绝</span>
+              </div>
+              <div class="changeset-h-right">
+                <span class="doc-size">昨天</span>
+              </div>
+            </div>
+            <div class="changeset-body">
+              <div class="change-line del">删除附录 A 至附录 C</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== Projection ====== -->
+    <div id="page-projection" class="page">
+      <div class="page-h">
+        <h1 class="page-h-title">文档投影</h1>
+        <p class="page-h-sub">将文档结构投影为 Web 可编辑视图</p>
+      </div>
+
+      <div class="projection-grid">
+        <div class="projection-panel">
+          <div class="projection-panel-h">
+            <span>&#128196;</span> 文档节点
+            <span class="badge badge-draft" style="margin-left:auto">42 个节点</span>
+          </div>
+          <div class="projection-panel-body">
+            <ul class="tree">
+              <li>
+                <div class="tree-toggle" onclick="this.querySelector('.arrow').classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+                  <span class="arrow open">&#9654;</span>
+                  <span class="icon">&#128193;</span>
+                  <span class="label">第一章 项目背景</span>
+                </div>
+                <ul class="tree">
+                  <li><div class="tree-toggle" onclick="showToast('投影', '已选中节点')"><span class="icon">&#9998;</span><span class="label">1.1 市场分析</span></div></li>
+                  <li><div class="tree-toggle" onclick="showToast('投影', '已选中节点')"><span class="icon">&#9998;</span><span class="label">1.2 用户需求</span></div></li>
+                  <li><div class="tree-toggle" onclick="showToast('投影', '已选中节点')"><span class="icon">&#9998;</span><span class="label">1.3 竞品调研</span></div></li>
+                </ul>
+              </li>
+              <li>
+                <div class="tree-toggle" onclick="this.querySelector('.arrow').classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+                  <span class="arrow">&#9654;</span>
+                  <span class="icon">&#128193;</span>
+                  <span class="label">第二章 功能规格</span>
+                </div>
+                <ul class="tree" style="display:none">
+                  <li><div class="tree-toggle" onclick="showToast('投影', '已选中节点')"><span class="icon">&#9998;</span><span class="label">2.1 核心功能</span></div></li>
+                  <li><div class="tree-toggle" onclick="showToast('投影', '已选中节点')"><span class="icon">&#9998;</span><span class="label">2.2 交互流程</span></div></li>
+                </ul>
+              </li>
+            </ul>
+            <div style="margin-top:16px">
+              <button class="btn btn-sm" onclick="showToast('投影', '节点已展开')">展开全部</button>
+              <button class="btn btn-sm" onclick="showToast('投影', '节点已折叠')">折叠全部</button>
+            </div>
+          </div>
+        </div>
+        <div class="projection-panel">
+          <div class="projection-panel-h">
+            <span>&#127760;</span> 投影预览
+            <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="showToast('投影', '已保存投影配置')">保存投影</button>
+          </div>
+          <div class="projection-panel-body">
+            <div class="projection-preview">
+              <h1 style="font-family:var(--font-serif);font-size:22px;font-style:italic;margin-bottom:12px">产品需求文档 v3.0</h1>
+              <h2 style="font-size:16px;font-weight:500;margin-bottom:8px;color:var(--accent)">1.1 市场分析</h2>
+              <p style="margin-bottom:8px;color:var(--text-secondary)">当前市场环境正在经历快速变化，数字化转型已成为企业发展的核心驱动力。</p>
+              <p style="color:var(--text-secondary)">全球文档智能化市场规模预计在2025年将达到 120 亿美元。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== API ====== -->
+    <div id="page-api" class="page">
+      <div class="page-h">
+        <h1 class="page-h-title">API 参考</h1>
+        <p class="page-h-sub">文档智能引擎 RESTful API 接口文档</p>
+      </div>
+
+      <div class="api-section">
+        <h3>&#128196; 文档管理</h3>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/v1/documents</span>
+            <span class="api-desc">获取文档列表</span>
+          </div>
+          <div class="api-body">
+            <pre>Response 200:
+{
+  "code": 200,
+  "data": [
+    {
+      "documentId": "doc-001",
+      "fileName": "产品需求文档_v3",
+      "fileFormat": ".docx",
+      "fileSize": 2400000,
+      "currentVersion": 3,
+      "status": "ready",
+      "createdAt": "2024-12-01T10:00:00Z",
+      "tags": ["产品", "需求"]
+    }
+  ],
+  "message": "success"
+}</pre>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/v1/documents/{id}</span>
+            <span class="api-desc">获取文档详情</span>
+          </div>
+          <div class="api-body">
+            <pre>Response 200:
+{
+  "code": 200,
+  "data": {
+    "documentId": "doc-001",
+    "fileName": "产品需求文档_v3",
+    "fileSize": 2400000,
+    "currentVersion": 3,
+    "status": "ready"
+  }
+}</pre>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/v1/documents/import</span>
+            <span class="api-desc">导入文档（multipart/form-data）</span>
+          </div>
+          <div class="api-body">
+            <pre>Request:  multipart/form-data, file: .docx
+Response 200:
+{
+  "code": 200,
+  "data": {
+    "documentId": "doc-001",
+    "fileName": "report.docx",
+    "status": "processing",
+    "totalParagraphs": 128,
+    "totalTables": 5,
+    "totalImages": 3,
+    "errorCount": 0
+  }
+}</pre>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method delete">DELETE</span>
+            <span class="api-path">/api/v1/documents/{id}</span>
+            <span class="api-desc">删除文档</span>
+          </div>
+          <div class="api-body">
+            <pre>Response 200: { "code": 200, "data": null, "message": "文档已删除" }</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="api-section">
+        <h3>&#128203; 文档节点</h3>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/v1/documents/{id}/nodes</span>
+            <span class="api-desc">获取文档节点树</span>
+          </div>
+          <div class="api-body">
+            <pre>Response 200:
+{
+  "code": 200,
+  "data": [
+    {
+      "nodeId": "node-001",
+      "type": "paragraph",
+      "text": "第一章 项目背景",
+      "level": 1,
+      "structuralPath": "/1",
+      "children": [
+        {
+          "nodeId": "node-002",
+          "type": "paragraph",
+          "text": "1.1 市场分析"
+        }
+      ]
+    }
+  ]
+}</pre>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/v1/nodes/{id}/children</span>
+            <span class="api-desc">获取节点子节点</span>
+          </div>
+          <div class="api-body">
+            <pre>Response 200: { "code": 200, "data": [ { "nodeId": "node-003", "type": "paragraph", "text": "1.1.1 市场规模" } ] }</pre>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method put">PUT</span>
+            <span class="api-path">/api/v1/nodes/{id}/text</span>
+            <span class="api-desc">更新节点文本</span>
+          </div>
+          <div class="api-body">
+            <pre>Request: { "text": "更新后的文本内容" }
+Response 200: { "code": 200, "data": { "nodeId": "node-001", "text": "更新后的文本内容" } }</pre>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method put">PUT</span>
+            <span class="api-path">/api/v1/nodes/{id}/attributes</span>
+            <span class="api-desc">更新节点属性</span>
+          </div>
+          <div class="api-body">
+            <pre>Request: { "attributes": { "fontSize": 14, "bold": true } }
+Response 200: { "code": 200, "data": { "nodeId": "node-001", "attributes": { "fontSize": 14 } } }</pre>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method delete">DELETE</span>
+            <span class="api-path">/api/v1/nodes/{id}</span>
+            <span class="api-desc">删除节点</span>
+          </div>
+          <div class="api-body">
+            <pre>Response 200: { "code": 200, "data": null, "message": "节点已删除" }</pre>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/v1/nodes/{id}/insertAfter</span>
+            <span class="api-desc">在节点后插入新节点</span>
+          </div>
+          <div class="api-body">
+            <pre>Request: { "type": "paragraph", "text": "新段落内容" }
+Response 200: { "code": 200, "data": { "nodeId": "node-new", "text": "新段落内容" } }</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="api-section">
+        <h3>&#9906; 搜索</h3>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/v1/documents/{id}/search</span>
+            <span class="api-desc">全文搜索</span>
+          </div>
+          <div class="api-body">
+            <pre>Request: { "query": "市场", "isRegex": false, "type": "paragraph", "format": "text" }
+Response 200:
+{
+  "code": 200,
+  "data": [
+    {
+      "documentId": "doc-001",
+      "fileName": "产品需求文档_v3",
+      "matches": [
+        {
+          "nodeId": "node-002",
+          "text": "市场分析",
+          "contextBefore": "1.1 ",
+          "contextAfter": "当前市场环境",
+          "position": 0
+        }
+      ],
+      "totalMatches": 3
+    }
+  ]
+}</pre>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/v1/documents/{id}/search/replace</span>
+            <span class="api-desc">查找并替换</span>
+          </div>
+          <div class="api-body">
+            <pre>Request: { "query": "市场", "replacement": "Market" }
+Response 200: { "code": 200, "data": { "totalReplaced": 3 } }</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="api-section">
+        <h3>&#10065; 变更集</h3>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/v1/documents/{id}/changesets</span>
+            <span class="api-desc">获取变更集列表</span>
+          </div>
+          <div class="api-body">
+            <pre>Response 200:
+{
+  "code": 200,
+  "data": [
+    {
+      "changeSetId": "cs-001",
+      "documentId": "doc-001",
+      "changes": [ ... ],
+      "status": "pending",
+      "createdAt": "2024-12-01T10:30:00Z"
+    }
+  ]
+}</pre>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/v1/documents/{id}/changesets</span>
+            <span class="api-desc">创建变更集</span>
+          </div>
+          <div class="api-body">
+            <pre>Request: { "changes": [ { "type": "text_update", "nodeId": "node-001", "newText": "..." } ] }
+Response 200: { "code": 200, "data": { "changeSetId": "cs-001", "status": "pending" } }</pre>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/v1/documents/{id}/changesets/{csId}/accept</span>
+            <span class="api-desc">接受变更集</span>
+          </div>
+          <div class="api-body">
+            <pre>Response 200: { "code": 200, "data": { "changeSetId": "cs-001", "status": "accepted" } }</pre>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/v1/documents/{id}/changesets/{csId}/reject</span>
+            <span class="api-desc">拒绝变更集</span>
+          </div>
+          <div class="api-body">
+            <pre>Response 200: { "code": 200, "data": { "changeSetId": "cs-001", "status": "rejected" } }</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="api-section">
+        <h3>&#8635; 版本</h3>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/v1/documents/{id}/versions</span>
+            <span class="api-desc">获取版本历史</span>
+          </div>
+          <div class="api-body">
+            <pre>Response 200:
+{
+  "code": 200,
+  "data": [
+    {
+      "versionNumber": 3,
+      "createdAt": "2024-12-01T14:30:00Z",
+      "changeSummary": "更新市场分析章节"
+    }
+  ]
+}</pre>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-h" onclick="toggleApiBody(this)">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/v1/documents/{id}/versions/{v}/restore</span>
+            <span class="api-desc">回滚到指定版本</span>
+          </div>
+          <div class="api-body">
+            <pre>Response 200: { "code": 200, "data": { "versionNumber": 2, "status": "restored" } }</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span id="toastTitle">&#10003;</span>
+  <span id="toastMessage">操作成功</span>
+</div>
+
+<script>
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelector('.nav-item[data-page="' + page + '"]').classList.add('active');
+  const titles = { dashboard:'概览', documents:'文档管理', editor:'文档编辑器', search:'文档搜索', versions:'版本管理', changesets:'变更审核', projection:'文档投影', api:'API 参考' };
+  document.getElementById('pageTitle').textContent = titles[page] || 'Word Agent';
+}
+function toggleFilter(el) { el.classList.toggle('active'); }
+function toggleChangeset(el) {
+  const body = el.nextElementSibling;
+  body.classList.toggle('open');
+}
+function toggleApiBody(el) {
+  const body = el.nextElementSibling;
+  body.classList.toggle('open');
+}
+function showToast(title, msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastMessage').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>

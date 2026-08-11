@@ -1,0 +1,193 @@
+<div class="layout">
+  <nav class="nav">
+    <div class="nav-brand">W</div>
+    <button class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      <span class="tip">概览</span>
+    </button>
+    <button class="nav-item" data-page="documents" onclick="switchPage('documents')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span class="tip">文档</span>
+    </button>
+    <button class="nav-item" data-page="editor" onclick="switchPage('editor')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <span class="tip">编辑</span>
+    </button>
+    <button class="nav-item" data-page="search" onclick="switchPage('search')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span class="tip">搜索</span>
+    </button>
+    <button class="nav-item" data-page="versions" onclick="switchPage('versions')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span class="tip">版本</span>
+    </button>
+    <button class="nav-item" data-page="changesets" onclick="switchPage('changesets')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      <span class="tip">变更</span>
+    </button>
+    <button class="nav-item" data-page="projection" onclick="switchPage('projection')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <span class="tip">投影</span>
+    </button>
+    <button class="nav-item" data-page="api" onclick="switchPage('api')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      <span class="tip">API</span>
+    </button>
+    <div class="nav-spacer"></div>
+    <div class="nav-avatar">L</div>
+  </nav>
+
+  <header class="header">
+    <div class="header-left">
+      <div class="header-bread"><span>Word Agent</span><span class="sep">/</span><span class="cur" id="breadcrumb">概览</span></div>
+    </div>
+    <div class="header-actions">
+      <div class="header-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-tertiary)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="搜索文档、内容..." id="globalSearch" onkeydown="if(event.key==='Enter'){switchPage('search');document.getElementById('searchInput').value=this.value;doSearch()}">
+      </div>
+      <button class="btn btn-accent btn-sm" onclick="openModal('import')">+ 导入</button>
+      <div class="header-avatar">L</div>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- EDITOR -->
+    <div class="page active" id="page-editor">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-icon teal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+          <div><div class="page-title">文档编辑器</div><div class="page-subtitle">2025年度项目方案报告</div></div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary">导出 .docx</button>
+          <button class="btn btn-accent" onclick="openModal('changeset')">提交变更</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="editor-toolbar">
+          <button title="加粗"><b>B</b></button>
+          <button title="斜体"><i>I</i></button>
+          <button title="下划线"><u>U</u></button>
+          <span class="sep"></span>
+          <button title="标题">H1</button>
+          <button title="子标题">H2</button>
+          <span class="sep"></span>
+          <button title="列表">≡</button>
+          <button title="编号">#</button>
+          <span class="sep"></span>
+          <button title="撤销">↩</button>
+          <button title="重做">↪</button>
+          <span class="sep"></span>
+          <button title="高亮">◉</button>
+          <button title="评论">◎</button>
+        </div>
+        <div class="editor-layout">
+          <div class="editor-tree">
+            <h4>文档结构</h4>
+            <div class="tree-item active">📄 项目方案报告</div>
+            <div class="tree-item indent">一、项目背景</div>
+            <div class="tree-item indent2">1.1 市场分析</div>
+            <div class="tree-item indent2">1.2 技术现状</div>
+            <div class="tree-item indent active">二、总体目标</div>
+            <div class="tree-item indent2">2.1 技术指标</div>
+            <div class="tree-item indent2">2.2 资源规划</div>
+            <div class="tree-item indent">三、资源预算</div>
+            <div class="tree-item indent">四、实施计划</div>
+            <div style="margin-top:16px"><h4>版本历史</h4>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:13px">
+                <span style="font-weight:500">v2.1</span><span class="version-tag">当前</span><span class="version-date">08-05</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:13px">
+                <span style="font-weight:500">v2.0</span><span></span><span class="version-date">08-01</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:13px">
+                <span style="font-weight:500">v1.3</span><span></span><span class="version-date">07-28</span>
+              </div>
+            </div>
+          </div>
+          <div class="editor-canvas">
+            <div class="editor-tabs">
+              <span class="editor-tab active" onclick="switchEditorTab(this,'edit')">编辑</span>
+              <span class="editor-tab" onclick="switchEditorTab(this,'preview')">预览</span>
+              <span class="editor-tab" onclick="switchEditorTab(this,'versions')">版本</span>
+              <span class="editor-tab" onclick="switchEditorTab(this,'changesets')">变更集</span>
+            </div>
+            <div class="editor-content" id="editor-content">
+              <h1>2025年度项目方案报告</h1>
+              <p><strong>一、项目背景</strong></p>
+              <p>随着业务规模的持续增长，现有系统架构已逐渐无法满足日益复杂的需求。本报告旨在梳理 <span class="highlight">2025年度</span> 核心项目目标，明确技术路径与资源分配方案。</p>
+              <p><strong>二、总体目标</strong></p>
+              <p>本年度项目聚焦三大核心方向：<strong>性能提升</strong>、<strong>用户体验优化</strong> 与 <strong>AI 能力集成</strong>。预计 Q3 完成架构升级，Q4 实现全平台覆盖。</p>
+              <p><strong>三、资源预算</strong></p>
+              <p>项目总预算预计 <span class="highlight">320 万元</span>，其中研发投入占比 60%，基础设施占比 25%，其余为运营与应急储备。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="page" id="page-search">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-icon blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <div><div class="page-title">全文搜索</div><div class="page-subtitle">搜索文档内容，支持替换操作</div></div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary" id="replaceToggle" onclick="toggleReplace()">替换模式</button>
+          <button class="btn btn-accent" onclick="doSearch()">搜索</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="search-bar">
+          <div class="search-input">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-tertiary);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" placeholder="输入搜索关键词..." id="searchInput" value="项目方案">
+          </div>
+          <select style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-sans);font-size:13px;color:var(--text);background:var(--surface);outline:none">
+            <option>全部文档</option>
+            <option>当前文档</option>
+          </select>
+        </div>
+        <div class="search-filters" id="searchFilters">
+          <span class="filter-chip active">全部</span>
+          <span class="filter-chip">标题</span>
+          <span class="filter-chip">正文</span>
+          <span class="filter-chip">注释</span>
+          <span style="margin-left:auto;font-size:12px;color:var(--text-tertiary);display:flex;align-items:center;gap:4px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            4 个结果
+          </span>
+        </div>
+        <div id="replaceBar" style="display:none;padding:12px 20px;border-bottom:1px solid var(--border-light);background:var(--orange-light)">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <span style="font-size:13px;font-weight:500;color:var(--orange)">替换为:</span>
+            <input type="text" placeholder="替换为..." id="replaceInput" value="2026年度" style="flex:1;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-sans);font-size:13px;outline:none;min-width:150px">
+            <button class="btn btn-accent btn-sm" onclick="showToast('已替换 3 处匹配','success')">替换全部</button>
+            <button class="btn btn-secondary btn-sm" onclick="toggleReplace()">取消</button>
+          </div>
+        </div>
+        <div class="search-result">
+          <div class="result-item">
+            <span class="result-icon">D</span>
+            <div style="flex:1;min-width:0">
+              <div class="result-title">2025年度<mark>项目方案</mark>报告</div>
+              <div class="result-preview">本报告旨在梳理2025年度核心<mark>项目</mark>目标，明确技术路径与资源分配<mark>方案</mark>。</div>
+              <div class="result-meta"><span>2.3 MB</span><span>2025-08-05</span><span>3 处匹配</span></div>
+            </div>
+          </div>
+          <div class="result-item">
+            <span class="result-icon">D</span>
+            <div style="flex:1;min-width:0">
+              <div class="result-title">产品需求文档 v2.1</div>
+              <div class="result-preview">本<mark>项目方案</mark>涵盖用户端和管理端的全部功能需求...</div>
+              <div class="result-meta"><span>1.1 MB</span><span>2025-08-04</span><span>1 处匹配</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

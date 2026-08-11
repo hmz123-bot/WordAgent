@@ -1,0 +1,43 @@
+# Maven
+target/
+*.class
+*.jar
+*.war
+*.zip
+*.tar.gz
+*.args
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temp
+temp/
+tmp/
+
+# Database (H2 file-based storage)
+data/
+
+# Secrets / local env
+.env
+.env.local
+.env.*.local
+
+# Frontend dependencies
+node_modules/
+
+# Agent / IDE personal config
+.workbuddy/
+.codebuddy/

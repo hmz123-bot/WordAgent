@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Agent · 文档工作台（复刻）</title>
+<style>
+  :root{
+    --bg:#f6efe3;
+    --bg-sidebar:#efe6d8;
+    --bg-card:#fffdf8;
+    --bg-card-hover:#f1e7d4;
+    --bg-input:#f3ead9;
+    --border:rgba(70,50,30,.12);
+    --border-strong:rgba(70,50,30,.20);
+    --text:#2e2620;
+    --text-2:#6b5f52;
+    --text-3:#9a8c7a;
+    --accent-1:#e07a2f;
+    --accent-2:#d98a2b;
+    --accent-grad:linear-gradient(135deg,#f0973f 0%,#e8593f 100%);
+    --accent-grad-2:linear-gradient(135deg,#f3b24a 0%,#e8853f 100%);
+    --radius:14px;
+    --radius-sm:10px;
+    --shadow:0 8px 30px rgba(80,55,25,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-thumb{background:rgba(120,90,60,.22);border-radius:8px}
+  ::-webkit-scrollbar-thumb:hover{background:rgba(120,90,60,.34)}
+  ::-webkit-scrollbar-track{background:transparent}
+
+  .app{display:flex;height:100vh}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:236px;flex-shrink:0;background:var(--bg-sidebar);
+    border-right:1px solid var(--border);display:flex;flex-direction:column;
+    padding:14px 12px;gap:4px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:6px 8px 14px}
+  .brand .logo{
+    width:30px;height:30px;border-radius:9px;background:var(--accent-grad);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;
+    box-shadow:0 4px 14px rgba(224,122,47,.35);
+  }
+  .brand .name{font-size:16px;font-weight:600;letter-spacing:.5px}
+  .brand .name small{display:block;font-size:10px;color:var(--text-3);font-weight:400;letter-spacing:1px}
+
+  .nav-group{display:flex;flex-direction:column;gap:2px}
+  .nav-label{font-size:11px;color:var(--text-3);padding:14px 10px 4px;letter-spacing:1px}
+  .nav-item{
+    display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:var(--radius-sm);
+    color:var(--text-2);font-size:14px;cursor:pointer;transition:.15s;user-select:none;
+  }
+  .nav-item:hover{background:var(--bg-card-hover);color:var(--text)}
+  .nav-item.active{background:var(--bg-card);color:var(--text);font-weight:500}
+  .nav-item.active .ico{color:var(--accent-2)}
+  .nav-item .ico{width:18px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text-2)}
+  .nav-item.active .ico{color:var(--accent-2)}
+  .nav-item .badge{margin-left:auto;font-size:10px;background:var(--accent-grad-2);color:#fff;padding:1px 7px;border-radius:20px}
+
+  .agent-card{
+    margin:14px 4px;border-radius:var(--radius);padding:14px;position:relative;overflow:hidden;
+    background:linear-gradient(150deg,#f6e3c4,#f3d9bf);border:1px solid rgba(224,122,47,.3);
+  }
+  .agent-card h4{font-size:14px;font-weight:600;margin-bottom:4px;color:var(--text)}
+  .agent-card p{font-size:11px;color:var(--text-2);line-height:1.5;margin-bottom:11px}
+  .agent-card .btn{
+    display:inline-block;width:100%;text-align:center;background:var(--accent-grad);
+    color:#fff;font-size:13px;font-weight:600;padding:8px;border-radius:9px;cursor:pointer;
+  }
+  .agent-card .spark{position:absolute;right:-20px;top:-20px;width:90px;height:90px;border-radius:50%;
+    background:radial-gradient(circle,rgba(240,151,63,.45),transparent 70%);}
+
+  .side-spacer{flex:1}
+  .user{
+    display:flex;align-items:center;gap:10px;padding:10px 8px;border-top:1px solid var(--border);
+  }
+  .user .avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-grad-2);display:flex;
+    align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff}
+  .user .meta b{font-size:13px;font-weight:500;display:block;color:var(--text)}
+  .user .meta span{font-size:11px;color:var(--text-3)}
+
+  /* ---------- Main ---------- */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .topbar{
+    height:58px;flex-shrink:0;border-bottom:1px solid var(--border);display:flex;align-items:center;
+    gap:16px;padding:0 22px;background:rgba(246,239,227,.72);backdrop-filter:blur(8px);
+  }
+  .topbar .tabs{display:flex;gap:6px}
+  .topbar .tab{
+    font-size:14px;color:var(--text-2);padding:7px 14px;border-radius:9px;cursor:pointer;transition:.15s;
+  }
+  .topbar .tab:hover{color:var(--text)}
+  .topbar .tab.active{color:var(--text);background:var(--bg-card);font-weight:500}
+  .search{
+    margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--bg-input);
+    border:1px solid var(--border);border-radius:10px;padding:8px 14px;width:280px;color:var(--text-3);font-size:13px;
+  }
+  .search input{background:none;border:none;outline:none;color:var(--text);font-size:13px;flex:1;width:100%}
+  .topbar .upgrade{
+    background:var(--accent-grad);color:#fff;font-size:13px;font-weight:600;padding:8px 16px;border-radius:10px;cursor:pointer;
+  }
+
+  .content{flex:1;overflow-y:auto;padding:22px}
+  .view{display:none}
+  .view.active{display:block}
+
+  /* Agent banner (模板 view) */
+  .banner{
+    border-radius:var(--radius);padding:22px 26px;margin-bottom:22px;position:relative;overflow:hidden;
+    background:linear-gradient(120deg,#f3e2c8,#f7ecd9 60%,#f6efe3);
+    border:1px solid rgba(224,122,47,.25);
+  }
+  .banner h2{font-size:24px;font-weight:700;margin-bottom:6px;letter-spacing:.5px;color:var(--text)}
+  .banner p{font-size:13px;color:var(--text-2);margin-bottom:14px}
+  .banner .btn{display:inline-block;background:var(--accent-grad);color:#fff;font-size:13px;font-weight:600;
+    padding:9px 20px;border-radius:10px;cursor:pointer}
+  .banner .glow{position:absolute;right:-40px;bottom:-60px;width:240px;height:240px;border-radius:50%;
+    background:radial-gradient(circle,rgba(240,151,63,.22),transparent 70%)}
+
+  /* Masonry grid */
+  .grid{column-count:4;column-gap:16px}
+  @media(max-width:1400px){.grid{column-count:3}}
+  @media(max-width:1000px){.grid{column-count:2}}
+  .card{
+    break-inside:avoid;margin-bottom:16px;border-radius:var(--radius);overflow:hidden;position:relative;
+    background:var(--bg-card);cursor:pointer;transition:transform .2s,box-shadow .2s;border:1px solid var(--border);
+  }
+  .card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+  .card .thumb{width:100%;display:block}
+  .card .overlay{
+    position:absolute;left:0;right:0;bottom:0;padding:12px 13px;
+    background:linear-gradient(transparent,rgba(0,0,0,.72));opacity:0;transition:.2s;
+  }
+  .card:hover .overlay{opacity:1}
+  .card .overlay .t{font-size:13px;font-weight:500;margin-bottom:6px;line-height:1.4;color:#fff}
+  .card .overlay .a{display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(255,255,255,.8)}
+  .card .overlay .a .av{width:18px;height:18px;border-radius:50%;background:var(--accent-grad-2)}
+  .card .tag{
+    position:absolute;top:10px;left:10px;font-size:10px;background:rgba(0,0,0,.45);color:#fff;
+    padding:3px 9px;border-radius:20px;backdrop-filter:blur(4px);
+  }
+
+  /* ---------- Writing workbench ---------- */
+  .workbench{max-width:880px;margin:0 auto}
+  .prompt-box{
+    background:var(--bg-card);border:1px solid var(--border-strong);border-radius:18px;padding:18px 18px 14px;
+    transition:.2s;
+  }
+  .prompt-box:focus-within{border-color:rgba(224,122,47,.6);box-shadow:0 0 0 3px rgba(224,122,47,.12)}
+  .prompt-box textarea{
+    width:100%;background:none;border:none;outline:none;resize:none;color:var(--text);
+    font-size:16px;line-height:1.6;font-family:inherit;height:84px;
+  }
+  .prompt-box textarea::placeholder{color:var(--text-3)}
+  .prompt-actions{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .chip{
+    font-size:12px;color:var(--text-2);background:var(--bg-input);border:1px solid var(--border);
+    padding:6px 12px;border-radius:20px;cursor:pointer;transition:.15s;
+  }
+  .chip:hover{color:var(--text);border-color:var(--border-strong)}
+  .prompt-actions .spacer{flex:1}
+  .gen-btn{
+    background:var(--accent-grad);color:#fff;font-size:14px;font-weight:600;padding:10px 26px;border-radius:11px;
+    cursor:pointer;border:none;display:flex;align-items:center;gap:7px;
+  }
+  .gen-btn:hover{filter:brightness(1.05)}
+
+  .controls{display:flex;gap:22px;margin:18px 4px;flex-wrap:wrap;align-items:center}
+  .control{display:flex;flex-direction:column;gap:7px}
+  .control .cl{font-size:12px;color:var(--text-3)}
+  .seg{display:flex;background:var(--bg-input);border:1px solid var(--border);border-radius:9px;overflow:hidden}
+  .seg button{
+    background:none;border:none;color:var(--text-2);font-size:12px;padding:7px 13px;cursor:pointer;font-family:inherit;
+  }
+  .seg button.on{background:var(--bg-card);color:var(--text);font-weight:500}
+  .sel{
+    background:var(--bg-input);border:1px solid var(--border);border-radius:9px;color:var(--text);
+    font-size:12px;padding:7px 13px;font-family:inherit;outline:none;cursor:pointer;
+  }
+
+  .result-head{display:flex;align-items:center;justify-content:space-between;margin:18px 4px 14px}
+  .result-head h3{font-size:15px;font-weight:600;color:var(--text)}
+  .result-head span{font-size:12px;color:var(--text-3)}
+  .result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .result{
+    aspect-ratio:1/1;border-radius:var(--radius);overflow:hidden;position:relative;border:1px solid var(--border);
+    background:var(--bg-card);
+  }
+  .result .thumb{width:100%;height:100%;object-fit:cover}
+  .result .ov{position:absolute;inset:0;background:linear-gradient(transparent 60%,rgba(0,0,0,.55));
+    opacity:0;transition:.2s;display:flex;align-items:flex-end;padding:12px}
+  .result:hover .ov{opacity:1}
+  .result .ov .dl{margin-left:auto;background:var(--accent-grad);color:#fff;font-size:11px;padding:5px 12px;border-radius:8px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">W</div>
+      <div class="name">Word Agent<small>WORD AGENT</small></div>
+    </div>
+
+    <div class="nav-group" id="navMain">
+      <div class="nav-item active" data-view="explore"><span class="ico">✦</span>模板</div>
+      <div class="nav-item" data-view="generate"><span class="ico">✚</span>写作</div>
+      <div class="nav-item" data-view="assets"><span class="ico">▦</span>文档</div>
+    </div>
+
+    <div class="agent-card">
+      <div class="spark"></div>
+      <h4>开启你的 Agent 模式</h4>
+      <p>智能写作！Agent 模式自动调用技能，陪你完成文档全流程。</p>
+      <div class="btn">立即开启</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">文档广场</div>
+      <div class="nav-item"><span class="ico">◉</span>发现</div>
+      <div class="nav-item"><span class="ico">⚙</span>技能<span class="badge">新</span></div>
+      <div class="nav-item"><span class="ico">▶</span>协作</div>
+      <div class="nav-item"><span class="ico">★</span>活动</div>
+      <div class="nav-item"><span class="ico">⌕</span>搜索</div>
+      <div class="nav-item"><span class="ico">↗</span>我的分享</div>
+    </div>
+
+    <div class="side-spacer"></div>
+    <div class="user">
+      <div class="avatar">U</div>
+      <div class="meta"><b>我的工作台</b><span>已登录 · 标准会员</span></div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <div class="tabs" id="topTabs">
+        <div class="tab active" data-view="explore">模板</div>
+        <div class="tab" data-view="generate">写作</div>
+        <div class="tab" data-view="assets">文档</div>
+      </div>
+      <div class="search">⌕ <input placeholder="搜索模板、文档、提示词…"></div>
+      <div class="upgrade">升级会员</div>
+    </div>
+
+    <div class="content">
+      <!-- Templates view -->
+      <section class="view active" id="view-explore">
+        <div class="banner">
+          <div class="glow"></div>
+          <h2>让文档创作更高效</h2>
+          <p>Agent 模式自动调用技能，从提纲到成稿一步到位。</p>
+          <div class="btn">体验 Agent 模式 →</div>
+        </div>
+        <div class="grid" id="exploreGrid"></div>
+      </section>
+
+      <!-- Writing view -->
+      <section class="view" id="view-generate">
+        <div class="workbench">
+          <div class="prompt-box">
+            <textarea id="prompt" placeholder="描述你想要的文档，Word Agent 帮你一键生成…"></textarea>
+            <div class="prompt-actions">
+              <div class="chip" data-p="帮我整理本周工作进展，生成一份结构清晰的周报，包含成果、风险与下周计划">📝 周报总结</div>
+              <div class="chip" data-p="撰写一份产品需求文档 PRD，包含背景、目标用户、功能列表与验收标准">📄 产品需求</div>
+              <div class="chip" data-p="写一封委婉拒绝合作邀约的商务邮件，语气专业且不伤和气">✉️ 商务邮件</div>
+              <div class="chip" data-p="根据会议要点整理成结构化会议纪要，标注待办事项与负责人">📊 会议纪要</div>
+              <span class="spacer"></span>
+              <div class="gen-btn" id="genBtn">⚡ 生成</div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="control">
+              <span class="cl">类型</span>
+              <div class="seg" id="typeSeg">
+                <button class="on">文章写作</button>
+                <button>报告</button>
+                <button>邮件</button>
+                <button>提纲</button>
+              </div>
+            </div>
+            <div class="control">
+              <span class="cl">篇幅</span>
+              <div class="seg" id="ratioSeg">
+                <button class="on">简短</button>
+                <button>适中</button>
+                <button>详细</button>
+                <button>长文</button>
+              </div>
+            </div>
+            <div class="control">
+              <span class="cl">文体</span>
+              <select class="sel">
+                <option>商务正式</option>
+                <option>简洁明了</option>
+                <option>学术严谨</option>
+                <option>营销活泼</option>
+                <option>技术文档</option>
+                <option>故事化</option>
+              </select>
+            </div>
+            <div class="control">
+              <span class="cl">润色</span>
+              <div class="seg"><button class="on">标准</button><button>精修</button><button>深度</button></div>
+            </div>
+          </div>
+
+          <div class="result-head">
+            <h3>生成结果</h3>
+            <span id="resultHint">输入需求后点击「生成」</span>
+          </div>
+          <div class="result-grid" id="resultGrid">
+            <div class="result"><div class="thumb" style="background:linear-gradient(135deg,#3a1c0a,#a8551b)"></div></div>
+            <div class="result"><div class="thumb" style="background:linear-gradient(135deg,#4a1530,#ff5e8a)"></div></div>
+            <div class="result"><div class="thumb" style="background:linear-gradient(135deg,#5a2a0e,#ff8a3c)"></div></div>
+            <div class="result"><div class="thumb" style="background:linear-gradient(135deg,#3a2410,#d98a2b)"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Documents view -->
+      <section class="view" id="view-assets">
+        <div class="workbench" style="text-align:center;padding-top:60px;color:var(--text-3)">
+          <div style="font-size:46px;margin-bottom:14px;color:var(--text-3)">▦</div>
+          <h3 style="color:var(--text);font-weight:600;margin-bottom:8px">我的文档</h3>
+          <p>这里会展示你创建过的文档、模板与项目文件。</p>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+  // ---- Data for templates grid (document template cards) ----
+  const works = [
+    {t:"自动周报生成器",a:"Aurora",tag:"模板",c:["#3a1c0a","#a8551b"]},
+    {t:"产品需求文档 PRD 模板",a:"Nova",tag:"模板",c:["#4a1530","#ff5e8a"]},
+    {t:"会议纪要智能整理",a:"Pixel",tag:"模板",c:["#5a2a0e","#ff8a3c"]},
+    {t:"商务邮件撰写助手",a:"Kira",tag:"模板",c:["#3a2410","#d98a2b"]},
+    {t:"学术论文草稿框架",a:"Lune",tag:"模板",c:["#4a1a12","#ff7043"]},
+    {t:"简历排版与优化",a:"Miau",tag:"模板",c:["#2e1a0a","#c9772b"]},
+    {t:"营销文案一键生成",a:"Forge",tag:"模板",c:["#5a1e0e","#ff6b3d"]},
+    {t:"合同审查要点清单",a:"墨白",tag:"模板",c:["#3a2a14","#b8862f"]},
+    {t:"读书笔记思维导图",a:"Neo",tag:"模板",c:["#4a2018","#ff8a5c"]},
+    {t:"演讲稿结构生成",a:"Lia",tag:"模板",c:["#2a1208","#e08a3c"]},
+    {t:"代码文档自动注释",a:"Elf",tag:"模板",c:["#3a1810","#ff9a5c"]},
+    {t:"社交媒体推文",a:"Bit",tag:"模板",c:["#4a2410","#d98a55"]}
+  ];
+  const grid = document.getElementById('exploreGrid');
+  works.forEach(w=>{
+    const h = 180 + Math.floor(Math.random()*120);
+    const el = document.createElement('div');
+    el.className='card';
+    el.innerHTML = `
+      <div class="thumb" style="height:${h}px;background:linear-gradient(150deg,${w.c[0]},${w.c[1]})"></div>
+      <div class="tag">${w.tag}</div>
+      <div class="overlay">
+        <div>
+          <div class="t">${w.t}</div>
+          <div class="a"><span class="av"></span>${w.a}</div>
+        </div>
+      </div>`;
+    grid.appendChild(el);
+  });
+
+  // ---- View switching (sidebar + top tabs stay in sync) ----
+  function switchView(v){
+    document.querySelectorAll('.nav-item[data-view]').forEach(n=>n.classList.toggle('active',n.dataset.view===v));
+    document.querySelectorAll('#topTabs .tab').forEach(t=>t.classList.toggle('active',t.dataset.view===v));
+    document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
+    document.getElementById('view-'+v).classList.add('active');
+  }
+  document.querySelectorAll('[data-view]').forEach(el=>{
+    el.addEventListener('click',()=>switchView(el.dataset.view));
+  });
+
+  // ---- Segmented controls ----
+  document.querySelectorAll('.seg').forEach(seg=>{
+    seg.querySelectorAll('button').forEach(b=>{
+      b.addEventListener('click',()=>{
+        seg.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+        b.classList.add('on');
+      });
+    });
+  });
+
+  // ---- Prompt chips fill textarea ----
+  document.querySelectorAll('.chip').forEach(ch=>{
+    ch.addEventListener('click',()=>{ document.getElementById('prompt').value = ch.dataset.p; });
+  });
+
+  // ---- Generate (fake) ----
+  document.getElementById('genBtn').addEventListener('click',()=>{
+    const p = document.getElementById('prompt').value.trim();
+    document.getElementById('resultHint').textContent = p ? '正在生成：'+p.slice(0,16)+'…' : '正在生成示例文档…';
+    const palettes=[["#3a1c0a","#a8551b"],["#4a1530","#ff5e8a"],["#5a2a0e","#ff8a3c"],["#3a2410","#d98a2b"]];
+    document.querySelectorAll('#resultGrid .result .thumb').forEach((t,i)=>{
+      const c=palettes[i%palettes.length];
+      t.style.background=`linear-gradient(135deg,${c[0]},${c[1]})`;
+    });
+    setTimeout(()=>{document.getElementById('resultHint').textContent='生成完成 · 4 段';},900);
+  });
+</script>
+</body>
+</html>

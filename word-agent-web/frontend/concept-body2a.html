@@ -1,0 +1,195 @@
+<div class="layout">
+  <nav class="nav">
+    <div class="nav-brand">W</div>
+    <button class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      <span class="tip">概览</span>
+    </button>
+    <button class="nav-item" data-page="documents" onclick="switchPage('documents')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span class="tip">文档</span>
+    </button>
+    <button class="nav-item" data-page="editor" onclick="switchPage('editor')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <span class="tip">编辑</span>
+    </button>
+    <button class="nav-item" data-page="search" onclick="switchPage('search')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span class="tip">搜索</span>
+    </button>
+    <button class="nav-item" data-page="versions" onclick="switchPage('versions')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span class="tip">版本</span>
+    </button>
+    <button class="nav-item" data-page="changesets" onclick="switchPage('changesets')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      <span class="tip">变更</span>
+    </button>
+    <button class="nav-item" data-page="projection" onclick="switchPage('projection')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <span class="tip">投影</span>
+    </button>
+    <button class="nav-item" data-page="api" onclick="switchPage('api')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      <span class="tip">API</span>
+    </button>
+    <div class="nav-spacer"></div>
+    <div class="nav-avatar">L</div>
+  </nav>
+  <header class="header">
+    <div class="header-left">
+      <div class="header-bread"><span>Word Agent</span><span class="sep">/</span><span class="cur" id="breadcrumb">概览</span></div>
+    </div>
+    <div class="header-actions">
+      <div class="header-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-tertiary)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="搜索文档、内容..." id="globalSearch">
+      </div>
+      <button class="btn btn-accent btn-sm" onclick="openModal('import')">+ 导入</button>
+      <div class="header-avatar">L</div>
+    </div>
+  </header>
+  <main class="main">
+    <!-- VERSIONS -->
+    <div class="page active" id="page-versions">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-icon green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div><div class="page-title">版本管理</div><div class="page-subtitle">追踪文档变更历史，支持回滚</div></div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary">创建版本</button>
+          <button class="btn btn-accent" onclick="showToast('版本对比功能已开启','info')">对比版本</button>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-bottom:24px">
+        <div class="card">
+          <div class="card-header"><h3>版本时间线</h3><span style="font-size:12px;color:var(--text-tertiary)">共 12 个版本</span></div>
+          <div class="card-body" style="padding:24px">
+            <div class="version-timeline">
+              <div class="version-item current">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+                  <div><span style="font-weight:500">v2.1</span> <span class="version-tag" style="margin-left:8px">当前版本</span></div>
+                  <span class="version-date">2025-08-05 14:32</span>
+                </div>
+                <div style="font-size:13px;color:var(--text-secondary);margin-top:4px">更新资源配置方案，调整预算分配</div>
+                <div style="display:flex;gap:8px;margin-top:8px">
+                  <button class="btn btn-secondary btn-sm">查看</button>
+                  <button class="btn btn-ghost btn-sm" onclick="showToast('已回滚到 v2.1','success')">回滚到此版本</button>
+                </div>
+              </div>
+              <div class="version-item approved">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+                  <div><span style="font-weight:500">v2.0</span> <span class="version-tag green">已批准</span></div>
+                  <span class="version-date">2025-08-01 10:15</span>
+                </div>
+                <div style="font-size:13px;color:var(--text-secondary);margin-top:4px">完成初稿，添加市场分析章节</div>
+                <div style="display:flex;gap:8px;margin-top:8px">
+                  <button class="btn btn-secondary btn-sm">查看</button>
+                  <button class="btn btn-ghost btn-sm" onclick="showToast('已回滚到 v2.0','success')">回滚</button>
+                </div>
+              </div>
+              <div class="version-item">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+                  <div><span style="font-weight:500">v1.3</span> <span class="version-tag orange">草稿</span></div>
+                  <span class="version-date">2025-07-28 16:48</span>
+                </div>
+                <div style="font-size:13px;color:var(--text-secondary);margin-top:4px">调整目录结构，新增技术指标章节</div>
+                <div style="display:flex;gap:8px;margin-top:8px">
+                  <button class="btn btn-secondary btn-sm">查看</button>
+                  <button class="btn btn-ghost btn-sm" onclick="showToast('已回滚到 v1.3','success')">回滚</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>版本详情</h3></div>
+          <div class="card-body">
+            <div style="margin-bottom:16px">
+              <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-tertiary);margin-bottom:8px">版本信息</div>
+              <div style="font-size:13px;color:var(--text-secondary);line-height:2">
+                <div><strong style="color:var(--text)">版本号:</strong> v2.1</div>
+                <div><strong style="color:var(--text)">创建者:</strong> 李小明</div>
+                <div><strong style="color:var(--text)">创建时间:</strong> 2025-08-05 14:32</div>
+                <div><strong style="color:var(--text)">状态:</strong> <span class="version-tag">当前版本</span></div>
+                <div><strong style="color:var(--text)">文件大小:</strong> 2.3 MB</div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-tertiary);margin-bottom:8px">变更说明</div>
+              <div style="font-size:13px;color:var(--text-secondary);padding:12px;background:var(--bg);border-radius:var(--radius-sm);line-height:1.6">
+                更新资源配置方案，调整预算分配。新增 Q3 实施计划章节，修改了技术指标部分的数据。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- CHANGESETS -->
+    <div class="page" id="page-changesets">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-icon orange"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
+          <div><div class="page-title">变更审核</div><div class="page-subtitle">审查并处理文档变更请求</div></div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary" onclick="openModal('changeset')">创建变更集</button>
+          <button class="btn btn-accent">批量处理</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:0">
+          <div class="changeset-item">
+            <div class="changeset-header">
+              <span class="changeset-title">更新资源配置方案</span>
+              <span class="badge badge-blue">待审核</span>
+            </div>
+            <div class="changeset-desc">调整第三章资源预算中的数据，新增 Q3 基础设施投入计划。</div>
+            <div class="changeset-meta"><span>文档: 2025年度项目方案报告</span><span>作者: 李小明</span><span>2 小时前</span><span>3 处修改</span></div>
+            <div class="changeset-actions" style="margin-top:10px">
+              <button class="btn btn-accent btn-sm" onclick="showToast('已接受变更集','success')">接受</button>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('已拒绝变更集','error')">拒绝</button>
+              <button class="btn btn-ghost btn-sm">详情</button>
+            </div>
+          </div>
+          <div class="changeset-item">
+            <div class="changeset-header">
+              <span class="changeset-title">修改技术指标章节</span>
+              <span class="badge badge-blue">待审核</span>
+            </div>
+            <div class="changeset-desc">更新 2.1 节性能指标数据，将并发目标从 1000 调整为 5000。</div>
+            <div class="changeset-meta"><span>文档: 2025年度项目方案报告</span><span>作者: 张华</span><span>5 小时前</span><span>2 处修改</span></div>
+            <div class="changeset-actions" style="margin-top:10px">
+              <button class="btn btn-accent btn-sm" onclick="showToast('已接受变更集','success')">接受</button>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('已拒绝变更集','error')">拒绝</button>
+              <button class="btn btn-ghost btn-sm">详情</button>
+            </div>
+          </div>
+          <div class="changeset-item">
+            <div class="changeset-header">
+              <span class="changeset-title">添加市场分析数据</span>
+              <span class="badge badge-green">已接受</span>
+            </div>
+            <div class="changeset-desc">在 1.1 节补充 2025 年市场规模数据及竞品分析图表。</div>
+            <div class="changeset-meta"><span>文档: 2025年度项目方案报告</span><span>作者: 王芳</span><span>1 天前</span><span>5 处修改</span></div>
+            <div class="changeset-actions" style="margin-top:10px">
+              <span style="font-size:12px;color:var(--text-tertiary)">已由 李小明 审批</span>
+            </div>
+          </div>
+          <div class="changeset-item">
+            <div class="changeset-header">
+              <span class="changeset-title">删除过时章节</span>
+              <span class="badge badge-red">已拒绝</span>
+            </div>
+            <div class="changeset-desc">建议删除 4.2 节中已不再适用的旧版流程描述。</div>
+            <div class="changeset-meta"><span>文档: 2025年度项目方案报告</span><span>作者: 张华</span><span>2 天前</span><span>1 处修改</span></div>
+            <div class="changeset-actions" style="margin-top:10px">
+              <span style="font-size:12px;color:var(--text-tertiary)">已由 李小明 拒绝 - 需保留作为参考</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

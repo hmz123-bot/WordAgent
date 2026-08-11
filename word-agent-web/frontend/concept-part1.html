@@ -1,0 +1,118 @@
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">主菜单</div>
+    <a href="#" class="sidebar-item active" onclick="switchPage('dashboard')"><span class="sidebar-icon">📊</span> 概览 <span class="sidebar-badge">12</span></a>
+    <a href="#" class="sidebar-item" onclick="switchPage('documents')"><span class="sidebar-icon">📄</span> 文档管理</a>
+    <a href="#" class="sidebar-item" onclick="switchPage('editor')"><span class="sidebar-icon">✏️</span> 文档编辑器</a>
+    <a href="#" class="sidebar-item" onclick="switchPage('search')"><span class="sidebar-icon">🔍</span> 全文搜索</a>
+    <div class="sidebar-section">文档流程</div>
+    <a href="#" class="sidebar-item" onclick="switchPage('versions')"><span class="sidebar-icon">🔄</span> 版本管理</a>
+    <a href="#" class="sidebar-item" onclick="switchPage('changesets')"><span class="sidebar-icon">📋</span> 变更审核 <span class="sidebar-badge" style="background:var(--orange-bg);color:var(--orange)">3</span></a>
+    <div class="sidebar-section">系统</div>
+    <a href="#" class="sidebar-item" onclick="switchPage('projection')"><span class="sidebar-icon">👁️</span> 文档投影</a>
+    <a href="#" class="sidebar-item" onclick="switchPage('api')"><span class="sidebar-icon">🔌</span> API 接口</a>
+  </aside>
+  <main class="main">
+    <div id="page-dashboard" class="page-content">
+      <div class="page-header">
+        <div class="page-header-left"><h1>概览</h1><p>文档引擎运行状态与核心指标</p></div>
+        <div class="page-header-actions">
+          <button class="btn btn-secondary" onclick="showToast('📥','正在导出分析报告...')">📊 导出报告</button>
+          <button class="btn btn-primary" onclick="openModal('importModal')">📤 导入文档</button>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card animate-fade" style="animation-delay:0.05s"><div class="stat-card-icon gold">📄</div><div class="stat-card-value">12</div><div class="stat-card-label">文档总数</div></div>
+        <div class="stat-card animate-fade" style="animation-delay:0.1s"><div class="stat-card-icon blue">📐</div><div class="stat-card-value">99.7%</div><div class="stat-card-label">解析保真度</div></div>
+        <div class="stat-card animate-fade" style="animation-delay:0.15s"><div class="stat-card-icon green">⏱️</div><div class="stat-card-value">&lt;50ms</div><div class="stat-card-label">平均解析延迟</div></div>
+        <div class="stat-card animate-fade" style="animation-delay:0.2s"><div class="stat-card-icon orange">🔄</div><div class="stat-card-value">47</div><div class="stat-card-label">版本总数</div></div>
+      </div>
+      <div class="upload-zone" onclick="showToast('📤','导入文档功能已就绪')">
+        <div class="upload-zone-icon">📄</div>
+        <div class="upload-zone-text">拖拽 .docx 文件到此处，或点击上传</div>
+        <div class="upload-zone-hint">支持 Word 2007+ 格式（.docx），最大 50MB</div>
+      </div>
+      <div class="section-card">
+        <div class="section-card-header"><h3>最近文档</h3><div class="section-card-header-actions"><button class="btn btn-ghost btn-sm" onclick="switchPage('documents')">查看全部</button></div></div>
+        <table class="doc-table"><thead><tr><th>文件名</th><th>大小</th><th>版本</th><th>状态</th><th>更新时间</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><div class="doc-name"><div class="doc-name-icon">📄</div>2025年度项目计划书.docx</div></td><td class="doc-size">2.4 MB</td><td>v2.3</td><td><span class="doc-status active"><span class="doc-status-dot"></span>已发布</span></td><td class="doc-size">2 小时前</td><td><div class="doc-actions"><button class="btn btn-ghost btn-icon btn-sm" onclick="switchPage('editor')">✏️</button><button class="btn btn-ghost btn-icon btn-sm">🔗</button></div></td></tr>
+          <tr><td><div class="doc-name"><div class="doc-name-icon">📄</div>技术架构设计文档.docx</div></td><td class="doc-size">1.8 MB</td><td>v1.1</td><td><span class="doc-status draft"><span class="doc-status-dot"></span>草稿</span></td><td class="doc-size">昨天</td><td><div class="doc-actions"><button class="btn btn-ghost btn-icon btn-sm" onclick="switchPage('editor')">✏️</button><button class="btn btn-ghost btn-icon btn-sm">🔗</button></div></td></tr>
+          <tr><td><div class="doc-name"><div class="doc-name-icon">📄</div>产品需求文档 PRD.docx</div></td><td class="doc-size">3.1 MB</td><td>v3.0</td><td><span class="doc-status active"><span class="doc-status-dot"></span>已发布</span></td><td class="doc-size">3 天前</td><td><div class="doc-actions"><button class="btn btn-ghost btn-icon btn-sm" onclick="switchPage('editor')">✏️</button><button class="btn btn-ghost btn-icon btn-sm">🔗</button></div></td></tr>
+          <tr><td><div class="doc-name"><div class="doc-name-icon">📄</div>会议纪要_2025Q1回顾.docx</div></td><td class="doc-size">0.6 MB</td><td>v1.0</td><td><span class="doc-status archived"><span class="doc-status-dot"></span>已归档</span></td><td class="doc-size">1 周前</td><td><div class="doc-actions"><button class="btn btn-ghost btn-icon btn-sm">✏️</button><button class="btn btn-ghost btn-icon btn-sm">🔗</button></div></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div id="page-documents" class="page-content" style="display:none">
+      <div class="page-header">
+        <div class="page-header-left"><h1>文档管理</h1><p>查看、导入、删除文档</p></div>
+        <div class="page-header-actions"><button class="btn btn-secondary">🔍 筛选</button><button class="btn btn-primary" onclick="openModal('importModal')">📤 导入文档</button></div>
+      </div>
+      <div class="section-card">
+        <div class="section-card-header"><h3>全部文档</h3><div class="section-card-header-actions"><span class="doc-size">共 12 个文档</span></div></div>
+        <table class="doc-table"><thead><tr><th>文件名</th><th>格式</th><th>大小</th><th>版本</th><th>状态</th><th>更新时间</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><div class="doc-name"><div class="doc-name-icon">📄</div>2025年度项目计划书.docx</div></td><td class="doc-size">docx</td><td class="doc-size">2.4 MB</td><td>v2.3</td><td><span class="doc-status active"><span class="doc-status-dot"></span>已发布</span></td><td class="doc-size">2h前</td><td><div class="doc-actions"><button class="btn btn-ghost btn-sm btn-icon">✏️</button><button class="btn btn-ghost btn-sm btn-icon">📥</button><button class="btn btn-danger btn-sm btn-icon">🗑️</button></div></td></tr>
+          <tr><td><div class="doc-name"><div class="doc-name-icon">📄</div>技术架构设计文档.docx</div></td><td class="doc-size">docx</td><td class="doc-size">1.8 MB</td><td>v1.1</td><td><span class="doc-status draft"><span class="doc-status-dot"></span>草稿</span></td><td class="doc-size">昨天</td><td><div class="doc-actions"><button class="btn btn-ghost btn-sm btn-icon">✏️</button><button class="btn btn-ghost btn-sm btn-icon">📥</button><button class="btn btn-danger btn-sm btn-icon">🗑️</button></div></td></tr>
+          <tr><td><div class="doc-name"><div class="doc-name-icon">📄</div>产品需求文档 PRD.docx</div></td><td class="doc-size">docx</td><td class="doc-size">3.1 MB</td><td>v3.0</td><td><span class="doc-status active"><span class="doc-status-dot"></span>已发布</span></td><td class="doc-size">3天前</td><td><div class="doc-actions"><button class="btn btn-ghost btn-sm btn-icon">✏️</button><button class="btn btn-ghost btn-sm btn-icon">📥</button><button class="btn btn-danger btn-sm btn-icon">🗑️</button></div></td></tr>
+          <tr><td><div class="doc-name"><div class="doc-name-icon">📄</div>会议纪要_2025Q1回顾.docx</div></td><td class="doc-size">docx</td><td class="doc-size">0.6 MB</td><td>v1.0</td><td><span class="doc-status archived"><span class="doc-status-dot"></span>已归档</span></td><td class="doc-size">1周前</td><td><div class="doc-actions"><button class="btn btn-ghost btn-sm btn-icon">✏️</button><button class="btn btn-ghost btn-sm btn-icon">📥</button><button class="btn btn-danger btn-sm btn-icon">🗑️</button></div></td></tr>
+          <tr><td><div class="doc-name"><div class="doc-name-icon">📄</div>市场调研报告_Q2.docx</div></td><td class="doc-size">docx</td><td class="doc-size">4.2 MB</td><td>v1.0</td><td><span class="doc-status draft"><span class="doc-status-dot"></span>草稿</span></td><td class="doc-size">2周前</td><td><div class="doc-actions"><button class="btn btn-ghost btn-sm btn-icon">✏️</button><button class="btn btn-ghost btn-sm btn-icon">📥</button><button class="btn btn-danger btn-sm btn-icon">🗑️</button></div></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div id="page-editor" class="page-content" style="display:none">
+      <div class="page-header">
+        <div class="page-header-left"><h1>文档编辑器</h1><p>2025年度项目计划书.docx · 节点级编辑，高保真渲染</p></div>
+        <div class="page-header-actions"><button class="btn btn-secondary" onclick="showToast('📥','正在导出文档...')">📥 导出</button><button class="btn btn-primary" onclick="showToast('✅','文档已保存')">💾 保存</button></div>
+      </div>
+      <div class="editor-panel">
+        <div class="editor-structure">
+          <div class="structure-header">📐 文档结构树</div>
+          <div class="structure-tree">
+            <div class="structure-item active"><span class="structure-item-icon">📄</span><span class="structure-item-text">项目计划书</span></div>
+            <div class="structure-item structure-item-indent-1"><span class="structure-item-icon">📝</span><span class="structure-item-text">摘要</span></div>
+            <div class="structure-item structure-item-indent-1"><span class="structure-item-icon">📝</span><span class="structure-item-text">背景分析</span></div>
+            <div class="structure-item structure-item-indent-2"><span class="structure-item-icon">📝</span><span class="structure-item-text">行业现状</span></div>
+            <div class="structure-item structure-item-indent-2"><span class="structure-item-icon">📝</span><span class="structure-item-text">竞争优势</span></div>
+            <div class="structure-item structure-item-indent-1"><span class="structure-item-icon">📝</span><span class="structure-item-text">项目目标</span></div>
+            <div class="structure-item structure-item-indent-1"><span class="structure-item-icon">📝</span><span class="structure-item-text">实施方案</span></div>
+            <div class="structure-item structure-item-indent-2"><span class="structure-item-icon">📝</span><span class="structure-item-text">阶段一：基础设施</span></div>
+            <div class="structure-item structure-item-indent-2"><span class="structure-item-icon">📝</span><span class="structure-item-text">阶段二：数据中台</span></div>
+            <div class="structure-item structure-item-indent-2"><span class="structure-item-icon">📝</span><span class="structure-item-text">阶段三：AI 集成</span></div>
+            <div class="structure-item structure-item-indent-1"><span class="structure-item-icon">📊</span><span class="structure-item-text">预算分析表</span></div>
+            <div class="structure-item structure-item-indent-1"><span class="structure-item-icon">🖼️</span><span class="structure-item-text">架构图</span></div>
+          </div>
+        </div>
+        <div class="editor-content-area">
+          <div class="editor-toolbar">
+            <div class="editor-toolbar-group"><button class="editor-tool-btn active"><b>B</b></button><button class="editor-tool-btn"><i>I</i></button><button class="editor-tool-btn"><u>U</u></button><button class="editor-tool-btn"><s>S</s></button></div>
+            <div class="editor-toolbar-group"><button class="editor-tool-btn">H1</button><button class="editor-tool-btn">H2</button><button class="editor-tool-btn">¶</button></div>
+            <div class="editor-toolbar-group"><button class="editor-tool-btn">≡</button><button class="editor-tool-btn">≡</button><button class="editor-tool-btn">≡</button></div>
+            <div class="editor-toolbar-group"><button class="editor-tool-btn">•</button><button class="editor-tool-btn">1.</button></div>
+            <div class="editor-toolbar-group"><button class="editor-tool-btn">▦</button><button class="editor-tool-btn">🔗</button><button class="editor-tool-btn">💬</button></div>
+            <div class="editor-tool-divider"></div>
+            <button class="editor-tool-btn" onclick="showToast('🔍','搜索功能已打开')">🔍</button>
+            <button class="editor-tool-btn" onclick="showToast('↩️','撤销操作')">↩️</button>
+            <button class="editor-tool-btn" onclick="showToast('↪️','重做操作')">↪️</button>
+          </div>
+          <div class="editor-body" id="editorBody">
+            <h1>2025 年度项目计划书</h1>
+            <div class="meta"><span>版本 v2.3</span><span>最后修改：2025-12-18</span><span class="meta-tag">审批中</span><span>作者：张明</span></div>
+            <h2>1. 摘要</h2>
+            <p>本计划书旨在系统性地规划 <em class="highlight">2025 年度数字化转型</em> 的各个阶段，确保项目按时、按质、按预算完成。项目涵盖 <strong>三个核心模块</strong>：基础设施升级、数据中台建设、以及 AI 能力集成。每个模块均设有明确的里程碑和交付标准。</p>
+            <h2>2. 背景分析</h2>
+            <h3>2.1 行业现状</h3>
+            <p>当前行业正处于数字化转型的关键时期。根据 Gartner 2024 年的报告，超过 70% 的企业已将数字化作为核心战略。然而，仅有不到 30% 的企业能够成功实现转型目标。</p>
+            <blockquote>数字化转型不是选择，而是生存之道。关键在于以正确的方式、正确的节奏推进。— 技术总监</blockquote>
+            <h2>3. 实施方案</h2>
+            <h3>3.1 阶段一：基础设施升级</h3>
+            <p>本阶段将重点升级服务器基础设施，实现容器化部署，并建立 CI/CD 流水线。预计周期 3 个月，预算 ¥2,500,000。</p>
+            <ul><li>Kubernetes 集群搭建</li><li>日志与监控系统建设</li><li>安全审计与合规检查</li></ul>
+            <h3>3.2 预算分析</h3>
+            <table><thead><tr><th>阶段</th><th>预算（万元）</th><th>周期</th><th>负责人</th></tr></thead>
+            <tbody><tr><td>基础设施升级</td><td>250</td><td>Q1 2025</td><td>王工</td></tr><tr><td>数据中台建设</td><td>350</td><td>Q2 2025</td><td>李工</td></tr><tr><td>AI 能力集成</td><td>250</td><td>Q3-Q4 2025</td><td>赵工</td></tr></tbody></table>
+            <p>项目总预算为 <span class="highlight">¥8,500,000</span>，预计周期 12 个月。</p>
+          </div>
+        </div>
+      </div>
+    </div>

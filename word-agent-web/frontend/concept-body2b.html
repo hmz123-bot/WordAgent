@@ -1,0 +1,216 @@
+<div class="layout">
+  <nav class="nav">
+    <div class="nav-brand">W</div>
+    <button class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      <span class="tip">概览</span>
+    </button>
+    <button class="nav-item" data-page="documents" onclick="switchPage('documents')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span class="tip">文档</span>
+    </button>
+    <button class="nav-item" data-page="editor" onclick="switchPage('editor')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <span class="tip">编辑</span>
+    </button>
+    <button class="nav-item" data-page="search" onclick="switchPage('search')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span class="tip">搜索</span>
+    </button>
+    <button class="nav-item" data-page="versions" onclick="switchPage('versions')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span class="tip">版本</span>
+    </button>
+    <button class="nav-item" data-page="changesets" onclick="switchPage('changesets')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      <span class="tip">变更</span>
+    </button>
+    <button class="nav-item" data-page="projection" onclick="switchPage('projection')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <span class="tip">投影</span>
+    </button>
+    <button class="nav-item" data-page="api" onclick="switchPage('api')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      <span class="tip">API</span>
+    </button>
+    <div class="nav-spacer"></div>
+    <div class="nav-avatar">L</div>
+  </nav>
+  <header class="header">
+    <div class="header-left">
+      <div class="header-bread"><span>Word Agent</span><span class="sep">/</span><span class="cur" id="breadcrumb">概览</span></div>
+    </div>
+    <div class="header-actions">
+      <div class="header-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-tertiary)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="搜索文档、内容..." id="globalSearch">
+      </div>
+      <button class="btn btn-accent btn-sm" onclick="openModal('import')">+ 导入</button>
+      <div class="header-avatar">L</div>
+    </div>
+  </header>
+  <main class="main">
+    <!-- PROJECTION -->
+    <div class="page active" id="page-projection">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-icon teal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+          <div><div class="page-title">文档投影</div><div class="page-subtitle">以 Web 编辑视图预览文档结构</div></div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary" onclick="showToast('投影视图已刷新','info')">刷新投影</button>
+          <button class="btn btn-accent" onclick="showToast('投影已导出为 HTML','success')">导出投影</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="projection-layout">
+          <div class="projection-panel">
+            <h4>节点结构</h4>
+            <div class="projection-node active">
+              <div class="node-type">标题</div>
+              <div class="node-text">2025年度项目方案报告</div>
+            </div>
+            <div class="projection-node">
+              <div class="node-type">段落</div>
+              <div class="node-text">一、项目背景</div>
+            </div>
+            <div class="projection-node">
+              <div class="node-type">段落</div>
+              <div class="node-text">随着业务规模的持续增长，现有系统架构已逐渐无法满足... <mark>2025年度</mark></div>
+            </div>
+            <div class="projection-node">
+              <div class="node-type">标题</div>
+              <div class="node-text">二、总体目标</div>
+            </div>
+            <div class="projection-node">
+              <div class="node-type">段落</div>
+              <div class="node-text">本年度项目聚焦三大核心方向：性能提升、用户体验优化...</div>
+            </div>
+            <div class="projection-node">
+              <div class="node-type">标题</div>
+              <div class="node-text">三、资源预算</div>
+            </div>
+          </div>
+          <div class="projection-panel">
+            <h4>Web 预览 (TipTap)</h4>
+            <div class="projection-preview">
+              <h2>2025年度项目方案报告</h2>
+              <p><strong>一、项目背景</strong></p>
+              <p>随着业务规模的持续增长，现有系统架构已逐渐无法满足日益复杂的需求。本报告旨在梳理 2025年度 核心项目目标，明确技术路径与资源分配方案。</p>
+              <p><strong>二、总体目标</strong></p>
+              <p>本年度项目聚焦三大核心方向：<strong>性能提升</strong>、<strong>用户体验优化</strong> 与 <strong>AI 能力集成</strong>。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- API -->
+    <div class="page" id="page-api">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-icon blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+          <div><div class="page-title">API 参考</div><div class="page-subtitle">后端 RESTful 接口文档</div></div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary">导出文档</button>
+          <button class="btn btn-accent" onclick="showToast('API 已同步','success')">同步</button>
+        </div>
+      </div>
+      <div class="api-nav" id="apiNav">
+        <span class="api-nav-item active" onclick="switchApiGroup(this,'doc')">文档</span>
+        <span class="api-nav-item" onclick="switchApiGroup(this,'node')">节点</span>
+        <span class="api-nav-item" onclick="switchApiGroup(this,'search')">搜索</span>
+        <span class="api-nav-item" onclick="switchApiGroup(this,'changeset')">变更集</span>
+        <span class="api-nav-item" onclick="switchApiGroup(this,'version')">版本</span>
+      </div>
+      <div id="apiGroup-doc" class="api-group">
+        <div class="api-group-title">文档管理</div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-header" onclick="toggleApi(this)">
+            <span class="api-method post">POST</span>
+            <span class="api-path">/api/v1/documents/import</span>
+            <span class="api-desc">导入 .docx 文档</span>
+          </div>
+          <div class="api-endpoint-body">
+            <div class="api-code"><span class="keyword">POST</span> /api/v1/documents/import<br/><span class="keyword">Content-Type:</span> <span class="string">multipart/form-data</span><br/><br/><span class="comment">// Request: file (multipart)</span><br/><span class="keyword">Response</span> {<br/>  <span class="key">"id"</span>: <span class="string">"uuid"</span>,<br/>  <span class="key">"fileName"</span>: <span class="string">"document.docx"</span>,<br/>  <span class="key">"status"</span>: <span class="string">"IMPORTED"</span>,<br/>  <span class="key">"nodeCount"</span>: <span class="string">24</span><br/>}</div>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-header" onclick="toggleApi(this)">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/v1/documents</span>
+            <span class="api-desc">获取文档列表</span>
+          </div>
+          <div class="api-endpoint-body">
+            <div class="api-code"><span class="keyword">GET</span> /api/v1/documents<br/><br/><span class="keyword">Response</span> [{<br/>  <span class="key">"id"</span>: <span class="string">"uuid"</span>,<br/>  <span class="key">"fileName"</span>: <span class="string">"string"</span>,<br/>  <span class="key">"status"</span>: <span class="string">"IMPORTED|DRAFT|PUBLISHED"</span>,<br/>  <span class="key">"fileSize"</span>: <span class="string">"number"</span>,<br/>  <span class="key">"versionCount"</span>: <span class="string">"number"</span>,<br/>  <span class="key">"createdAt"</span>: <span class="string">"datetime"</span><br/>}]</div>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-header" onclick="toggleApi(this)">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/v1/documents/{id}</span>
+            <span class="api-desc">获取文档详情</span>
+          </div>
+          <div class="api-endpoint-body">
+            <div class="api-code"><span class="keyword">GET</span> /api/v1/documents/{id}<br/><br/><span class="keyword">Response</span> {<br/>  <span class="key">"id"</span>: <span class="string">"uuid"</span>,<br/>  <span class="key">"fileName"</span>: <span class="string">"string"</span>,<br/>  <span class="key">"fileSize"</span>: <span class="string">"number"</span>,<br/>  <span class="key">"versionCount"</span>: <span class="string">"number"</span>,<br/>  <span class="key">"createdAt"</span>: <span class="string">"datetime"</span><br/>}</div>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-header" onclick="toggleApi(this)">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/v1/documents/{id}/nodes</span>
+            <span class="api-desc">获取节点树</span>
+          </div>
+          <div class="api-endpoint-body">
+            <div class="api-code"><span class="keyword">GET</span> /api/v1/documents/{id}/nodes<br/><br/><span class="keyword">Response</span> [{<br/>  <span class="key">"id"</span>: <span class="string">"uuid"</span>,<br/>  <span class="key">"type"</span>: <span class="string">"PARAGRAPH|HEADING|TABLE"</span>,<br/>  <span class="key">"text"</span>: <span class="string">"string"</span>,<br/>  <span class="key">"level"</span>: <span class="string">"number"</span>,<br/>  <span class="key">"children"</span>: [<span class="string">"node"</span>]<br/>}]</div>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-header" onclick="toggleApi(this)">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/v1/documents/{id}/projection</span>
+            <span class="api-desc">获取 Web 编辑投影</span>
+          </div>
+          <div class="api-endpoint-body">
+            <div class="api-code"><span class="keyword">GET</span> /api/v1/documents/{id}/projection<br/><br/><span class="keyword">Response</span> {<br/>  <span class="key">"html"</span>: <span class="string">"TipTap HTML string"</span>,<br/>  <span class="key">"nodes"</span>: [<span class="string">"node"</span>]<br/>}</div>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-header" onclick="toggleApi(this)">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/v1/documents/{id}/export</span>
+            <span class="api-desc">导出 .docx</span>
+          </div>
+          <div class="api-endpoint-body">
+            <div class="api-code"><span class="keyword">GET</span> /api/v1/documents/{id}/export<br/><br/><span class="comment">// Returns .docx binary stream</span></div>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-header" onclick="toggleApi(this)">
+            <span class="api-method delete">DELETE</span>
+            <span class="api-path">/api/v1/documents/{id}</span>
+            <span class="api-desc">删除文档</span>
+          </div>
+          <div class="api-endpoint-body">
+            <div class="api-code"><span class="keyword">DELETE</span> /api/v1/documents/{id}<br/><br/><span class="keyword">Response</span> { <span class="key">"success"</span>: <span class="keyword">true</span> }</div>
+          </div>
+        </div>
+      </div>
+      <div id="apiGroup-node" class="api-group" style="display:none">
+        <div class="api-group-title">节点操作</div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-header" onclick="toggleApi(this)">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/v1/documents/{id}/nodes/{nodeId}</span>
+            <span class="api-desc">获取节点详情</span>
+          </div>
+          <div class="api-endpoint-body">
+            <div class="api-code"><span class="keyword">GET</span> /api/v1/documents/{id}/nodes/{nodeId}<br/><br/><span class="keyword">Response</span> {<br/>  <span class="key">"id"</span>: <span class="string">"uuid"</span>,<br/>  <span class="key">"type"</span>: <span class="string">"string"</span>,<br/>  <span class="key">"text"</span>: <span class="string">"string"</span>,<br/>  <span class="key">"attributes"</span>: {<span class="key">"bold"</span>: <span class="keyword">true</span>},<br/>  <span class="key">"children"</span>: [<span class="string">"node"</span>]<br/>}</div>
+          </div>
+        </div>
+        <div class="api-endpoint">
+          <div class="api-endpoint-header" onclick="toggleApi(this)">
+            <span class="api-method get">GET</span>
+            <span class="api-path">/api/v1/documents/{id}/nodes/{nodeId}/children</span>
+            <span class="api-desc">获取子节点</span>
+          </div>

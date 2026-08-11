@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Agent - 设计概念</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F8F6F3; --surface: #FFF; --surface-subtle: #F3F1EE;
+  --text-primary: #1A1D24; --text-secondary: #7A7F8A; --text-tertiary: #B0B4BC;
+  --accent: #2D8C7F; --accent-light: #E8F3F1;
+  --border: #E5E1DB; --border-light: #EFEBE5;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.08);
+  --radius: 12px; --radius-sm: 8px;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-sans: 'Instrument Sans', -apple-system, sans-serif;
+  --transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-sans); background: var(--bg); color: var(--text-primary); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.container { max-width: 1280px; margin: 0 auto; padding: 0 64px; }
+.hero { padding: 80px 0 60px; position: relative; }
+.hero-glow { position: absolute; top: -120px; right: -80px; width: 500px; height: 500px; background: radial-gradient(circle at center, rgba(45,140,127,0.06) 0%, transparent 70%); pointer-events: none; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: var(--accent-light); color: var(--accent); border-radius: 100px; font-size: 13px; font-weight: 500; margin-bottom: 24px; }
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+.hero h1 { font-family: var(--font-serif); font-size: clamp(48px, 6vw, 72px); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; max-width: 700px; }
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero p { font-size: 18px; color: var(--text-secondary); margin-top: 20px; max-width: 520px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; border-radius: 100px; font-family: var(--font-sans); font-size: 15px; font-weight: 500; border: none; cursor: pointer; transition: var(--transition); }
+.btn-primary { background: var(--text-primary); color: #fff; }
+.btn-primary:hover { background: #2D323C; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-secondary { background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); }
+.section-title { padding: 60px 0 0; }
+.section-title h2 { font-family: var(--font-serif); font-size: 36px; font-weight: 400; letter-spacing: -0.01em; }
+.section-title p { color: var(--text-secondary); font-size: 15px; margin-top: 8px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.grid-2 { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; }
+.grid-2e { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--border-light); }
+.principle { background: var(--surface); padding: 36px 32px; }
+.principle:hover { background: var(--surface-subtle); }
+.principle .num { font-family: var(--font-serif); font-size: 48px; color: var(--border); line-height: 1; margin-bottom: 16px; }
+.principle h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.principle p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+.stat-card { background: var(--bg); border-radius: var(--radius-sm); padding: 18px 20px; border: 1px solid var(--border-light); }
+.stat-label { font-size: 12px; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; }
+.stat-value { font-family: var(--font-serif); font-size: 28px; font-weight: 400; margin-top: 4px; }
+.stat-change { font-size: 12px; color: var(--accent); margin-top: 2px; }
+.mh { display: flex; align-items: center; justify-content: space-between; padding: 20px 28px; border-bottom: 1px solid var(--border-light); }
+.mb { display: flex; align-items: center; gap: 10px; font-family: var(--font-serif); font-size: 20px; }
+.mb .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.mn { display: flex; gap: 6px; }
+.mn-item { padding: 8px 16px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+.mn-item.active { background: var(--accent-light); color: var(--accent); }
+.av { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #E5E1DB, #D0CCC4); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+.mbody { padding: 28px; }
+.tb { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.sb { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--bg); border-radius: var(--radius-sm); border: 1px solid var(--border-light); width: 280px; }
+.sb input { border: none; background: transparent; font-family: var(--font-sans); font-size: 14px; color: var(--text-primary); outline: none; width: 100%; }
+.tbb { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; border: 1px solid var(--border-light); background: var(--surface); color: var(--text-secondary); }
+.tbb.p { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-tertiary); border-bottom: 1px solid var(--border-light); }
+td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--border-light); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface-subtle); }
+.dn { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+.di { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; background: var(--accent-light); color: var(--accent); }
+.st { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 100px; font-size: 12px; font-weight: 500; }
+.st-p { background: #E8F3E8; color: #2D7F4A; }
+.st-r { background: #E8EFF5; color: #2D6B8C; }
+.st-d { background: #F5F0E8; color: #8C7A2D; }
+.cs { color: var(--text-secondary); font-size: 13px; }
+.et { display: flex; border-bottom: 1px solid var(--border-light); padding: 0 20px; }
+.etab { padding: 14px 20px; font-size: 13px; font-weight: 500; color: var(--text-tertiary); border-bottom: 2px solid transparent; }
+.etab.active { color: var(--text-primary); border-bottom-color: var(--accent); }
+.ec { padding: 20px; }
+.dt { font-family: var(--font-serif); font-size: 28px; font-weight: 400; margin-bottom: 20px; }
+.ep { font-size: 15px; line-height: 1.8; color: var(--text-secondary); margin-bottom: 16px; }
+.ep strong { color: var(--text-primary); font-weight: 600; }
+.ep .hl { background: #FEF3C7; padding: 1px 4px; border-radius: 2px; }
+.sb2 { padding: 20px; background: var(--bg); border-left: 1px solid var(--border-light); }
+.sbs { margin-bottom: 24px; }
+.sbs h4 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); margin-bottom: 12px; }
+.si { font-size: 13px; color: var(--text-secondary); padding: 4px 0; }
+.si.cur { color: var(--accent); font-weight: 500; }
+.vr { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-light); font-size: 13px; }
+.vr:last-child { border-bottom: none; }
+.vn { font-weight: 500; }
+.vt { padding: 2px 8px; border-radius: 100px; font-size: 11px; background: var(--accent-light); color: var(--accent); }
+.vd { color: var(--text-tertiary); font-size: 12px; }
+.sbar { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--border-light); }
+.si2 { flex: 1; display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: var(--bg); border-radius: var(--radius-sm); border: 1px solid var(--border-light); }
+.si2 input { border: none; background: transparent; font-family: var(--font-sans); font-size: 14px; color: var(--text-primary); outline: none; width: 100%; }
+.sr { padding: 8px; }
+.ri { display: flex; align-items: flex-start; gap: 14px; padding: 14px 12px; border-radius: var(--radius-sm); }
+.ri:hover { background: var(--surface-subtle); }
+.ri2 { width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: var(--accent-light); color: var(--accent); }
+.rt { font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
+.rt mark { background: #FEF3C7; padding: 0 2px; border-radius: 2px; }
+.rp { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.rm { display: flex; gap: 12px; margin-top: 6px; font-size: 12px; color: var(--text-tertiary); }
+.modal { background: var(--surface); border-radius: var(--radius); box-shadow: 0 24px 80px rgba(0,0,0,0.15); overflow: hidden; border: 1px solid var(--border-light); }
+.mh2 { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border-light); }
+.mh2 h3 { font-family: var(--font-serif); font-size: 20px; font-weight: 400; }
+.mc { width: 32px; height: 32px; border-radius: 50%; border: none; background: transparent; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); font-size: 18px; }
+.mb2 { padding: 24px; }
+.mf { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--border-light); }
+.uz { border: 2px dashed var(--border); border-radius: var(--radius); padding: 48px 24px; text-align: center; transition: var(--transition); }
+.uz:hover { border-color: var(--accent); background: var(--accent-light); }
+.uz .ui { font-size: 40px; color: var(--accent); margin-bottom: 16px; }
+.uz p { font-size: 15px; font-weight: 500; }
+.uz .hint { font-size: 13px; color: var(--text-tertiary); margin-top: 8px; }
+.palette { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 20px; }
+.swatch { border-radius: var(--radius-sm); overflow: hidden; }
+.swatch:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.sc { height: 64px; }
+.sl { padding: 8px 12px; background: var(--surface); font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+.sl .hex { color: var(--text-tertiary); font-weight: 400; font-size: 11px; }
+.tr { display: flex; align-items: baseline; gap: 32px; padding: 16px 0; border-bottom: 1px solid var(--border-light); }
+.tr:last-child { border-bottom: none; }
+.tl { width: 120px; font-size: 12px; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; }
+.footer { padding: 40px 0; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; color: var(--text-tertiary); font-size: 13px; margin-top: 80px; }
+.fl { display: flex; gap: 24px; }
+.fl a { color: var(--text-secondary); text-decoration: none; }
+.p40 { padding: 40px 0; }
+.p20 { padding: 20px 0; }
+.mt24 { margin-top: 24px; }
+.mb28 { margin-bottom: 28px; }
+@media (max-width: 1024px) {
+  .container { padding: 0 32px; }
+  .grid-2, .grid-2e { grid-template-columns: 1fr; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .container { padding: 0 20px; }
+  .grid-4 { grid-template-columns: 1fr; }
+  .palette { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="badge"><span class="badge-dot"></span>设计概念 v1.0</div>
+    <h1>智能文档<br>处理 <em>Agent</em></h1>
+    <p>一个融合 AI 能力的文档管理平台，支持智能解析、版本追踪、全文搜索与批量处理。</p>
+    <div style="display:flex;gap:12px;margin-top:36px">
+      <button class="btn btn-primary">浏览设计</button>
+      <button class="btn btn-secondary">设计系统</button>
+    </div>
+  </div>
+  <div class="section-title"><h2>设计原则</h2><p>塑造产品体验的核心理念</p></div>
+  <div class="grid-3 p40">
+    <div class="principle"><div class="num">01</div><h3>克制即力量</h3><p>每个界面元素都有存在的理由。不为装饰而装饰，空白本身即是信息。</p></div>
+    <div class="principle"><div class="num">02</div><h3>内容优先</h3><p>文档是核心。界面退居幕后，让内容本身成为视觉焦点。</p></div>
+    <div class="principle"><div class="num">03</div><h3>微妙质感</h3><p>暖灰底色、柔和阴影、细致边框，营造纸张般的温暖触感。</p></div>
+  </div>
+  <div class="section-title"><h2>界面展示</h2><p>核心页面与交互组件的设计预览</p></div>
+  <div class="p20">
+    <div class="card">
+      <div class="mh"><div class="mb"><span class="dot"></span>Word Agent</div><div class="mn"><span class="mn-item active">文档</span><span class="mn-item">搜索</span><span class="mn-item">版本</span></div><div class="av">L</div></div>
+      <div class="mbody">
+        <div class="grid-4 mb28">
+          <div class="stat-card"><div class="stat-label">总文档</div><div class="stat-value">24</div><div class="stat-change">+3 本月</div></div>
+          <div class="stat-card"><div class="stat-label">待审</div><div class="stat-value">7</div><div class="stat-change">-2</div></div>
+          <div class="stat-card"><div class="stat-label">版本</div><div class="stat-value">89</div><div class="stat-change">+12</div></div>
+          <div class="stat-card"><div class="stat-label">存储</div><div class="stat-value">2.4GB</div><div class="stat-change">38%</div></div>
+        </div>
+        <div class="tb">
+          <div class="sb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-tertiary);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="搜索文档..." value="项目方案"></div>
+          <div style="display:flex;gap:8px"><span class="tbb">筛选</span><span class="tbb p">导入文档</span></div>
+        </div>
+        <table><thead><tr><th>文件名</th><th>状态</th><th>大小</th><th>更新日期</th><th></th></tr></thead><tbody>
+          <tr><td><div class="dn"><span class="di">D</span>2025年度项目方案报告</div></td><td><span class="st st-p">已发布</span></td><td class="cs">2.3 MB</td><td class="cs">2025-08-05</td><td style="color:var(--text-tertiary)">&#9998; &#8943;</td></tr>
+          <tr><td><div class="dn"><span class="di">D</span>产品需求文档 v2.1</div></td><td><span class="st st-r">审核中</span></td><td class="cs">1.1 MB</td><td class="cs">2025-08-04</td><td style="color:var(--text-tertiary)">&#9998; &#8943;</td></tr>
+          <tr><td><div class="dn"><span class="di">D</span>技术架构设计文档</div></td><td><span class="st st-d">草稿</span></td><td class="cs">856 KB</td><td class="cs">2025-08-03</td><td style="color:var(--text-tertiary)">&#9998; &#8943;</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div class="grid-2 mt24">
+      <div class="card">
+        <div class="et"><span class="etab active">编辑</span><span class="etab">预览</span><span class="etab">版本</span><span class="etab">变更集</span></div>
+        <div style="display:grid;grid-template-columns:1fr 240px;min-height:320px">
+          <div class="ec">
+            <div class="dt">2025年度项目方案报告</div>
+            <div class="ep"><strong>一、项目背景</strong></div>
+            <div class="ep">随着业务规模的持续增长，现有系统架构已逐渐无法满足日益复杂的需求。本报告旨在梳理 <span class="hl">2025年度</span> 核心项目目标，明确技术路径与资源分配方案。</div>
+            <div class="ep"><strong>二、总体目标</strong></div>
+          </div>
+          <div class="sb2">
+            <div class="sbs"><h4>文档结构</h4><div class="si">&#8212; 一、项目背景</div><div class="si">&#8212; 二、总体目标</div><div class="si" style="padding-left:16px">2.1 技术指标</div><div class="si cur">&#8212; 三、资源预算</div></div>
+            <div class="sbs"><h4>版本历史</h4><div class="vr"><span class="vn">v2.1</span><span class="vt">当前</span><span class="vd">08-05</span></div><div class="vr"><span class="vn">v2.0</span><span></span><span class="vd">08-01</span></div><div class="vr"><span class="vn">v1.3</span><span></span><span class="vd">07-28</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="sbar">
+          <div class="si2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-tertiary);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="搜索文档内容..." value="项目方案"></div>
+          <span class="tbb p">搜索</span>
+        </div>
+        <div class="sr">
+          <div class="ri"><span class="ri2">D</span><div style="flex:1;min-width:0"><div class="rt">2025年度<mark>项目方案</mark>报告</div><div class="rp">本报告旨在梳理2025年度核心<mark>项目</mark>目标，明确技术路径与资源分配<mark>方案</mark>。</div><div class="rm"><span>2.3 MB</span><span>2025-08-05</span><span>3 处匹配</span></div></div></div>
+          <div class="ri"><span class="ri2">D</span><div style="flex:1;min-width:0"><div class="rt">产品需求文档 v2.1</div><div class="rp">本<mark>项目方案</mark>涵盖用户端和管理端的全部功能需求...</div><div class="rm"><span>1.1 MB</span><span>2025-08-04</span><span>1 处匹配</span></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2e mt24">
+      <div class="modal">
+        <div class="mh2"><h3>导入文档</h3><span class="mc">&times;</span></div>
+        <div class="mb2"><div class="uz"><div class="ui">&#128196;</div><p>点击或拖拽文件到此处</p><div class="hint">支持 .docx 格式，单个文件最大 50MB</div></div></div>
+        <div class="mf"><button class="btn btn-secondary">取消</button><button class="btn btn-primary">导入</button></div>
+      </div>
+      <div class="modal">
+        <div class="mh2"><h3>替换确认</h3><span class="mc">&times;</span></div>
+        <div class="mb2"><div style="text-align:center;padding:20px 0"><div style="font-size:40px;margin-bottom:12px;color:var(--accent)">&#9888;</div><p style="font-size:15px;font-weight:500">确定替换 3 处匹配？</p><p style="font-size:13px;color:var(--text-secondary);margin-top:6px">此操作不可撤销</p></div></div>
+        <div class="mf"><button class="btn btn-secondary">取消</button><button class="btn btn-primary">确认替换</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="section-title"><h2>色彩系统</h2><p>温暖、克制的调色板</p></div>
+  <div class="p40"><div class="palette">
+    <div class="swatch"><div class="sc" style="background:#1A1D24"></div><div class="sl">Text Primary <span class="hex">#1A1D24</span></div></div>
+    <div class="swatch"><div class="sc" style="background:#7A7F8A"></div><div class="sl">Text Secondary <span class="hex">#7A7F8A</span></div></div>
+    <div class="swatch"><div class="sc" style="background:#F8F6F3"></div><div class="sl">Background <span class="hex">#F8F6F3</span></div></div>
+    <div class="swatch"><div class="sc" style="background:#FFF"></div><div class="sl">Surface <span class="hex">#FFFFFF</span></div></div>
+    <div class="swatch"><div class="sc" style="background:#2D8C7F"></div><div class="sl">Accent <span class="hex">#2D8C7F</span></div></div>
+    <div class="swatch"><div class="sc" style="background:#E8F3F1"></div><div class="sl">Accent Light <span class="hex">#E8F3F1</span></div></div>
+    <div class="swatch"><div class="sc" style="background:#E5E1DB"></div><div class="sl">Border <span class="hex">#E5E1DB</span></div></div>
+    <div class="swatch"><div class="sc" style="background:#F3F1EE"></div><div class="sl">Surface Subtle <span class="hex">#F3F1EE</span></div></div>
+    <div class="swatch"><div class="sc" style="background:#FEF3C7"></div><div class="sl">Highlight <span class="hex">#FEF3C7</span></div></div>
+    <div class="swatch"><div class="sc" style="background:#B0B4BC"></div><div class="sl">Text Tertiary <span class="hex">#B0B4BC</span></div></div>
+  </div></div>
+  <div class="section-title"><h2>字体系统</h2><p>Instrument Serif + Instrument Sans</p></div>
+  <div class="p40">
+    <div class="tr"><div class="tl">H1 / Serif</div><div style="font-family:var(--font-serif);font-size:48px;line-height:1.1;letter-spacing:-0.02em">智能文档处理 Agent</div></div>
+    <div class="tr"><div class="tl">H2 / Serif</div><div style="font-family:var(--font-serif);font-size:32px;line-height:1.2;letter-spacing:-0.01em">2025年度项目方案报告</div></div>
+    <div class="tr"><div class="tl">H3 / Sans</div><div style="font-size:20px;font-weight:600;line-height:1.3">一、项目背景与总体目标</div></div>
+    <div class="tr"><div class="tl">Body / Sans</div><div style="font-size:15px;line-height:1.7;color:var(--text-secondary)">随着业务规模的持续增长，现有系统架构已逐渐无法满足日益复杂的需求。本报告旨在梳理年度核心项目目标，明确技术路径与资源分配方案。</div></div>
+    <div class="tr"><div class="tl">Caption / Sans</div><div style="font-size:12px;line-height:1.5;color:var(--text-tertiary)">最后更新: 2025-08-05 | 2.3 MB | 版本 2.1</div></div>
+  </div>
+  <div class="footer"><span>Word Agent - 设计概念展示</span><div class="fl"><a href="#">文档</a><a href="#">GitHub</a><a href="#">反馈</a></div></div>
+</div>
+</body>
+</html>
